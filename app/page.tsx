@@ -3,5 +3,5 @@ export default function Home() {
     <main>
       <h1>Runes</h1>
     </main>
-  );
+  )
 }
