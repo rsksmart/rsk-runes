@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+build
+public
+
+*.d.ts
+*.d.ts
+*.d.mts
+*.d.cts
+*.d.mjs
+*.d.cjs
