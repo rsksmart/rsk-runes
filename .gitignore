@@ -48,6 +48,7 @@ build/
 *.swp
 *.swo
 *~
+.next
 
 ----------------------------------
 # Package managers
