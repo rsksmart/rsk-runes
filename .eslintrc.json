@@ -4,7 +4,8 @@
     "prettier/prettier": [
       "error",
       {
-        "endOfLine": "auto"
+        "endOfLine": "auto",
+        "semi": false
       }
     ]
   }
