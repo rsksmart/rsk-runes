@@ -32,6 +32,7 @@ export function RuneERC20({
   const [contract, setContract] = useState<ethers.Contract | null>(null)
   const [tokenAddress, setTokenAddress] = useState<string | null>(null)
   const [params, setParams] = useState<Params | null>(null)
+  const [salt, setSalt] = useState<string | null>(null)
   const PRIVATE_KEY = process.env.REACT_APP_PK
   const RPC_URL = process.env.REACT_APP_RPC_URL
 
@@ -49,6 +50,7 @@ export function RuneERC20({
     if (!contract) return
 
     const salt = generateSalt()
+    setSalt(salt)
 
     const tokenAddress = await contract.getTokenAddress(
       name,
