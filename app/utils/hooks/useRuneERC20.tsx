@@ -12,6 +12,8 @@ interface Params {
   initialSupply: ethers.BigNumberish
   initialOwner: string
   salt: string
+  _mintAmount: ethers.BigNumberish
+  _maxSupply: ethers.BigNumberish
 }
 
 interface UseRuneERC20Props {
@@ -20,6 +22,8 @@ interface UseRuneERC20Props {
   initialSupply: ethers.BigNumberish
   initialOwner: string
   runeID: string
+  _mintAmount: ethers.BigNumberish
+  _maxSupply: ethers.BigNumberish
 }
 
 export const useRuneERC20 = ({
@@ -28,6 +32,8 @@ export const useRuneERC20 = ({
   initialOwner,
   initialSupply,
   runeID,
+  _mintAmount,
+  _maxSupply,
 }: UseRuneERC20Props) => {
   const [provider, setProvider] = useState<ethers.JsonRpcProvider | null>(null)
   const [wallet, setWallet] = useState<ethers.Wallet | null>(null)
@@ -35,7 +41,9 @@ export const useRuneERC20 = ({
   const [tokenAddress, setTokenAddress] = useState<string | null>(null)
   const [params, setParams] = useState<Params | null>(null)
   const [salt, setSalt] = useState<string | null>(null)
-
+  const [txStatus, setTxStatus] = useState<string | null>(null)
+  const [loadingCreateRune, setLoadingCreateRune] = useState<boolean>(false)
+  const [createReceipt, setCreateReceipt] = useState<any | null>(null)
   useEffect(() => {
     connectToBlockchain()
   }, [])
@@ -77,7 +85,16 @@ export const useRuneERC20 = ({
     const salt = generateSalt()
     setSalt(salt)
     console.log('Getting token address')
-    console.log('Params:', name, symbol, initialSupply, initialOwner, salt)
+    console.log(
+      'Params:',
+      name,
+      symbol,
+      initialSupply,
+      initialOwner,
+      salt,
+      _mintAmount,
+      _maxSupply
+    )
 
     try {
       const tokenAddress = await contract.getTokenAddress(
@@ -85,10 +102,20 @@ export const useRuneERC20 = ({
         symbol,
         initialSupply,
         initialOwner,
-        salt
+        salt,
+        _mintAmount,
+        _maxSupply
       )
       setTokenAddress(tokenAddress)
-      setParams({ name, symbol, initialSupply, initialOwner, salt })
+      setParams({
+        name,
+        symbol,
+        initialSupply,
+        initialOwner,
+        salt,
+        _mintAmount,
+        _maxSupply,
+      })
     } catch (error) {
       console.error('Error getting token address:', error)
     }
@@ -97,24 +124,61 @@ export const useRuneERC20 = ({
   const createRune = async () => {
     console.log('Creating rune')
     if (!contract || !params) return
+    const {
+      name,
+      symbol,
+      initialSupply,
+      initialOwner,
+      salt,
+      _mintAmount,
+      _maxSupply,
+    } = params
 
-    const { name, symbol, initialSupply, initialOwner, salt } = params
     console.log(
       'Creating rune with params:',
       name,
       symbol,
       initialSupply,
       initialOwner,
-      salt
+      salt,
+      _mintAmount,
+      _maxSupply
     )
-    const newcontract = await contract.createRune(
-      name,
-      symbol,
-      initialSupply,
-      initialOwner,
-      runeID,
-      salt
-    )
+
+    try {
+      setLoadingCreateRune(true)
+      setTxStatus('pending')
+      const transaction = await contract.createRune(
+        name,
+        symbol,
+        initialSupply,
+        initialOwner,
+        runeID,
+        salt,
+        _mintAmount,
+        _maxSupply
+      )
+
+      console.log('Transaction sent:', transaction)
+      console.log('Transaction hash:', transaction.hash)
+
+      const receipt = await transaction.wait()
+      console.log('Transaction confirmed:', receipt)
+
+      if (receipt.status === 1) {
+        console.log('Rune created successfully:', receipt)
+        setTxStatus('success')
+        setCreateReceipt(receipt)
+      } else {
+        console.error('Transaction failed:', receipt)
+        setTxStatus('error')
+      }
+      setLoadingCreateRune(false)
+    } catch (error) {
+      console.error('Error creating rune:', error)
+      setLoadingCreateRune(false)
+      setTxStatus('error')
+    }
   }
 
   const generateSalt = (): string => {
@@ -129,5 +193,8 @@ export const useRuneERC20 = ({
     getTokenAddress,
     createRune,
     connectToBlockchain,
+    loadingCreateRune,
+    txStatus,
+    createReceipt,
   }
 }
