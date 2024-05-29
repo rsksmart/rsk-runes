@@ -2,7 +2,7 @@ import { Discord, Github, Twitter } from '@/components/icons'
 
 export default function Footer(): JSX.Element {
   return (
-    <footer className="flex items-center justify-between w-full py-3 px-5">
+    <footer className="flex lg:items-center items-start flex-col gap-6 lg:flex-row justify-between w-full py-3 px-5">
       <div>
         <p>
           Built by <span className="text-xl font-bold">RootstockLabs</span>
