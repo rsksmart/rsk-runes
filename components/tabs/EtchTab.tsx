@@ -31,6 +31,14 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 
+// import {
+//   commitTx,
+//   revealTx,
+//   waitForTxToMature,
+//   findUtxo,
+//   waitForTxToBeConfirmed,
+// } from '@/app/utils/etch'
+
 const formSchema = z.object({
   name: z
     .string()
@@ -47,11 +55,11 @@ const formSchema = z.object({
   premine: z.string().min(0, { message: 'Premine is required.' }),
   amount: z.string().min(0, { message: 'Amount is required.' }),
   cap: z.string().min(0, { message: 'Cap is required.' }),
-  divisibility: z.number().min(0, { message: 'Divisibility is required.' }),
+  divisibility: z.string().min(0, { message: 'Divisibility is required.' }),
   address: z
     .string()
-    .min(3, { message: 'Symbol must be at least 3 characters.' })
-    .max(6, { message: 'Symbol cannot exceed 6 characters.' }),
+    .min(3, { message: 'Address must be at least 42 characters.' })
+    .max(42, { message: 'Address cannot exceed 42 characters.' }),
 })
 
 interface FormData {
@@ -110,40 +118,37 @@ export default function EtchTab(): JSX.Element {
     },
   })
 
-  const onSubmit = (data: FormData) => {
-    console.log(data)
+  const onSubmit = async (data: FormData) => {
+    try {
+      console.log(data)
 
-    // const { name, symbol, premine, amount, cap, divisibility, address } = data
+      const { name, symbol, premine, amount, cap, divisibility, address } = data
 
-    //   const {
-    //     txHash: commitTxHash,
-    //     scriptP2trAddress,
-    //     tapLeafScript,
-    //   } = await commitTx({ name, "" })
+      // const commitData = await commitTx({ name: name.toUpperCase() })
+      // const { commitTxHash, scriptP2trAddress, tapLeafScript } = commitData
+      // localStorage.setItem('commitData', JSON.stringify(commitData))
 
-    //   await waitForTxToMature(commitTxHash)
+      // await waitForTxToMature(commitTxHash)
 
-    //   const commitUtxo = await findUtxo(scriptP2trAddress, commitTxHash)
-    //   commitUtxo.tapLeafScript = tapLeafScript
+      // const commitUtxo = await findUtxo(scriptP2trAddress, commitTxHash)
+      // commitUtxo.tapLeafScript = tapLeafScript
 
-    //   console.log({ commitUtxo })
+      // const { revealTxHash } = await revealTx({
+      //   commitUtxo,
+      //   name,
+      //   amount,
+      //   cap,
+      //   symbol,
+      //   divisibility,
+      //   premine,
+      // })
 
-    //   const { txHash: revealTxHash } = await revealTx({
-    //     input: {
-    //       commitUtxo,
-    //     },
-    //     name,
-    //     amount,
-    //     cap,
-    //     symbol,
-    //     divisibility,
-    //     premine,
-    //     inscriptionContent,
-    //   })
+      // await waitForTxToBeConfirmed(revealTxHash)
 
-    //   await waitForTxToBeConfirmed(revealTxHash)
-
-    //   return { revealTxHash }
+      // return { revealTxHash }
+    } catch (error) {
+      console.log('Error on submit:', error)
+    }
   }
 
   return (
@@ -397,7 +402,7 @@ export default function EtchTab(): JSX.Element {
               />
               <CardFooter className="px-0">
                 <Button className="mt-5" type="submit">
-                  Create Etch Token
+                  Etch Token
                 </Button>
               </CardFooter>
             </form>

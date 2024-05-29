@@ -3,7 +3,7 @@ import EtchTab from '@/components/tabs/EtchTab'
 import MintTab from '@/components/tabs/MintTab'
 import { ethers } from 'ethers'
 import { useRuneERC20 } from '@/app/utils/hooks/useRuneERC20'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import LastEtchTab from './LastEtchTab'
 
 export default function TabsSection() {
@@ -28,6 +28,7 @@ export default function TabsSection() {
     console.log('txStatus:', txStatus)
     console.log('createReceipt:', createReceipt)
   }, [loadingCreateRune, txStatus, createReceipt])
+  const [isProcessing, setIsProcessing] = useState<boolean>(false)
 
   return (
     <Tabs className="w-full max-w-2xl" defaultValue="etch">
@@ -36,7 +37,10 @@ export default function TabsSection() {
         <TabsTrigger value="lastEtch">Last Etch</TabsTrigger>
       </TabsList>
       <EtchTab />
-      <LastEtchTab />
+      <LastEtchTab
+        isProcessing={isProcessing}
+        setIsProcessing={setIsProcessing}
+      />
       <div>
         {/* <h1>Runes</h1>
         <button onClick={getTokenAddress}>Get Token Address</button>
