@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<img src="rootstock-logo.png" alt="RSK Logo" style="width:100%; height: auto;" />
 
-## Getting Started
+# Runes Mock Bridge
 
-First, run the development server:
+This project is an open-source proof of concept implementing a Runes Mock Bridge. The primary goal is to allow users to etch (and eventually mint) Runes on the Bitcoin network and create a 1:1 representation of these Runes as ERC20 tokens on the Rootstock (RSK) network.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Table of Contents
+
+- [Overview](#overview)
+- [Technologies Used](#technologies-used)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Future Development](#future-development)
+- [Contributing](#contributing)
+- [Support](#support)
+
+## Overview
+
+The Runes Mock Bridge consists of two main processes:
+
+1. **Etching Runes on Bitcoin**: Users can etch Runes containing data entered through a form. A signer instantiated on Rootstock signs the transaction, creating the Rune without the user needing to sign any transactions directly.
+2. **Creating ERC20 Representation on RSK**: Once a Rune is etched on Bitcoin, the system calls an ERC20 Factory to deploy an ERC20 token contract on RSK. The token's information is based on the user's input for the Rune. The user receives the specified amount of tokens in a "premine" specified during the Rune creation.
+
+## Technologies Used
+
+- **Runelib**: [Runelib GitHub](https://github.com/sCrypt-Inc/runelib)
+- **BitcoinJS**: [BitcoinJS GitHub](https://github.com/bitcoinjs/bitcoinjs-lib)
+- **Hardhat**: [Hardhat Documentation](https://hardhat.org/docs)
+- **OpenZeppelin Standards**: [OpenZeppelin](https://www.openzeppelin.com/)
+- **ShadCN**: [ShadCN Documentation](https://ui.shadcn.com/docs)
+- **Ethers.js**: [Ethers.js Documentation](https://docs.ethers.org/v5/)
+
+## Project Structure
+
+```
+├── app
+│   ├── layout.tsx
+│   ├── page.tsx
+│   └── utils
+│       ├── abi
+│       └── hooks
+│           └── useRuneERC20.tsx
+├── components
+│   ├── tabs
+│   │   ├── EtchTab.tsx
+│   │   ├── index.tsx
+│   │   ├── LastEtchTab.tsx
+│   │   └── MintTab.tsx
+│   └── ui
+├── components.json
+├── constants
+│   └── index.ts
+├── functions
+│   └── index.ts
+├── lib
+│   └── utils.ts
+├── package.json
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+To clone and run this project locally, follow these steps:
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+1. **Clone the repository**:
 
-## Learn More
+   ```sh
+   git clone https://github.com/ezequiel-rodriguez/rsk-runes.git
+   cd rsk-runes
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. **Install dependencies**:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```sh
+   yarn
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+3. **Configure environment variables**:
+   Create a `.env` file in the root directory and add necessary environment variables. Example:
 
-## Deploy on Vercel
+   ```sh
+   RSK_PROVIDER_URL="https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID"
+   PRIVATE_KEY="your-private-key"
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. **Run the development server**:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+   ```sh
+   yarn dev
+   ```
+
+## Usage
+
+1. **Access the application**: Open [http://localhost:3000](http://localhost:3000) in your browser.
+2. **Etch a Rune**: Navigate to the Etch tab, fill out the form, and submit to etch a Rune on Bitcoin.
+3. **View ERC20 Representation**: After etching, view the deployed ERC20 token details on the Last Etch tab.
+
+## Future Development
+
+- **Minting Runes**: The minting functionality is under development and will be available in future releases.
+
+## Contributing
+
+We welcome contributions from the community. Please fork the repository and submit pull requests with your changes. Ensure your code adheres to the project's main objective.
+
+## Support
+
+For any questions or support, please open an issue on the repository or reach out to the maintainers.
