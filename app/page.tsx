@@ -1,5 +1,6 @@
 'use client'
 
+import Footer from '@/components/Footer'
 import TabsSection from '@/components/tabs'
 import { mint } from '@/functions'
 
@@ -9,7 +10,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-svh flex-col items-center justify-start ">
+    <main className="flex min-h-svh flex-col items-center justify-between">
       <div className="gradient scale-[.2] md:scale-100 absolute right-0 opacity-70 animate-pulse"></div>
       <div className="gradient scale-[.2] md:scale-100 absolute left-0 bottom-0 opacity-70 animate-pulse"></div>
       <section className="mb-20 z-10">
