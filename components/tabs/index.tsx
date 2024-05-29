@@ -4,6 +4,7 @@ import MintTab from '@/components/tabs/MintTab'
 import { ethers } from 'ethers'
 import { useRuneERC20 } from '@/app/utils/hooks/useRuneERC20'
 import { useEffect } from 'react'
+import LastEtchTab from './LastEtchTab'
 
 export default function TabsSection() {
   const {
@@ -32,15 +33,15 @@ export default function TabsSection() {
     <Tabs className="w-full max-w-2xl" defaultValue="etch">
       <TabsList className="grid grid-cols-2 w-full">
         <TabsTrigger value="etch">Etch</TabsTrigger>
-        <TabsTrigger value="mint">Mint</TabsTrigger>
+        <TabsTrigger value="lastEtch">Last Etch</TabsTrigger>
       </TabsList>
       <EtchTab />
-      <MintTab />
+      <LastEtchTab />
       <div>
-        <h1>Runes</h1>
+        {/* <h1>Runes</h1>
         <button onClick={getTokenAddress}>Get Token Address</button>
         <button onClick={createRune}>Create Rune</button>
-        {tokenAddress && <p>Token Address: {tokenAddress}</p>}
+        {tokenAddress && <p>Token Address: {tokenAddress}</p>} */}
       </div>
     </Tabs>
   )

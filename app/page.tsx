@@ -19,6 +19,7 @@ export default function Home() {
         </h1>
         <TabsSection />
       </section>
+      <Footer />
     </main>
   )
 }
