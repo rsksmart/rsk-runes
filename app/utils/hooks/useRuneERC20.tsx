@@ -17,13 +17,13 @@ interface Params {
 }
 
 interface UseRuneERC20Props {
-  name: string
-  symbol: string
-  initialSupply: ethers.BigNumberish
-  initialOwner: string
-  runeID: string
-  _mintAmount: ethers.BigNumberish
-  _maxSupply: ethers.BigNumberish
+  name?: string
+  symbol?: string
+  initialSupply?: ethers.BigNumberish
+  initialOwner?: string
+  runeID?: string
+  _mintAmount?: ethers.BigNumberish
+  _maxSupply?: ethers.BigNumberish
 }
 
 export const useRuneERC20 = ({
@@ -108,13 +108,13 @@ export const useRuneERC20 = ({
       )
       setTokenAddress(tokenAddress)
       setParams({
-        name,
-        symbol,
-        initialSupply,
-        initialOwner,
+        name: name!,
+        symbol: symbol!,
+        initialSupply: initialSupply!,
+        initialOwner: initialOwner!,
         salt,
-        _mintAmount,
-        _maxSupply,
+        _mintAmount: _mintAmount!,
+        _maxSupply: _maxSupply!,
       })
     } catch (error) {
       console.error('Error getting token address:', error)

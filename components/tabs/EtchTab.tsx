@@ -31,14 +31,6 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 
-// import {
-//   commitTx,
-//   revealTx,
-//   waitForTxToMature,
-//   findUtxo,
-//   waitForTxToBeConfirmed,
-// } from '@/app/utils/etch'
-
 const formSchema = z.object({
   name: z
     .string()
@@ -50,30 +42,28 @@ const formSchema = z.object({
     }),
   symbol: z
     .string()
-    .min(3, { message: 'Symbol must be at least 3 characters.' })
-    .max(6, { message: 'Symbol cannot exceed 6 characters.' }),
-  premine: z.string().min(0, { message: 'Premine is required.' }),
+    .length(1, { message: 'Symbol must be a single character.'  }),
+  premine: z.string(),
   amount: z.string().min(0, { message: 'Amount is required.' }),
   cap: z.string().min(0, { message: 'Cap is required.' }),
-  divisibility: z.string().min(0, { message: 'Divisibility is required.' }),
+  divisibility: z.string().max(38, { message: 'Divisibility cannot be higher than 38.' }),
   address: z
     .string()
-    .min(3, { message: 'Address must be at least 42 characters.' })
-    .max(42, { message: 'Address cannot exceed 42 characters.' }),
+    .length(42, { message: 'Address cannot exceed 42 characters.' }),
 })
 
-interface FormData {
-  name: string
-  symbol: string
-  premine: number
-  amount: number
-  cap: number
-  divisibility: number
-  address: string
+export interface FormData {
+  name?: string
+  symbol?: string
+  premine?: number
+  amount?: number
+  cap?: number
+  divisibility?: number
+  address?: string
 }
 
 interface CustomInputProps {
-  value: string
+  value?: string
   onChange: (value: string) => void
   id: string
   placeholder: string
@@ -104,7 +94,11 @@ const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
 
 CustomInput.displayName = 'CustomInput'
 
-export default function EtchTab(): JSX.Element {
+export default function EtchTab({
+  setRuneProps
+}: { 
+  setRuneProps: Function
+}): JSX.Element {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -120,35 +114,35 @@ export default function EtchTab(): JSX.Element {
 
   const onSubmit = async (data: FormData) => {
     try {
-      console.log(data)
+    //   setRuneProps(data)
+    //   const { name, symbol, premine, amount, cap, address, divisibility } = data
 
-      const { name, symbol, premine, amount, cap, divisibility, address } = data
+    //   const commitData = await commitTx({ name: name!.toUpperCase() })
 
-      // const commitData = await commitTx({ name: name.toUpperCase() })
-      // const { commitTxHash, scriptP2trAddress, tapLeafScript } = commitData
-      // localStorage.setItem('commitData', JSON.stringify(commitData))
+    //   const { commitTxHash, scriptP2trAddress, tapLeafScript } = commitData
+    //   localStorage.setItem('commitData', JSON.stringify(commitData))
 
-      // await waitForTxToMature(commitTxHash)
+    //   await waitForTxToMature(commitTxHash)
 
-      // const commitUtxo = await findUtxo(scriptP2trAddress, commitTxHash)
-      // commitUtxo.tapLeafScript = tapLeafScript
+    //   const commitUtxo = await findUtxo(scriptP2trAddress, commitTxHash)
+    //   commitUtxo.tapLeafScript = tapLeafScript
 
-      // const { revealTxHash } = await revealTx({
-      //   commitUtxo,
-      //   name,
-      //   amount,
-      //   cap,
-      //   symbol,
-      //   divisibility,
-      //   premine,
-      // })
+    //   const { revealTxHash } = await revealTx({
+    //     commitUtxo,
+    //     name,
+    //     amount,
+    //     cap,
+    //     symbol,
+    //     divisibility,
+    //     premine
+    //   })
 
-      // await waitForTxToBeConfirmed(revealTxHash)
+    //   await waitForTxToBeConfirmed(revealTxHash)
 
-      // return { revealTxHash }
-    } catch (error) {
-      console.log('Error on submit:', error)
-    }
+    //   return { revealTxHash }
+    // } catch (error) {
+    //   console.log('Error on submit:', error)
+    // }
   }
 
   return (
@@ -189,9 +183,6 @@ export default function EtchTab(): JSX.Element {
                           id="name"
                         />
                       </FormControl>
-                      <FormDescription>
-                        Name must be between 13 and 24 characters.
-                      </FormDescription>
                       <FormMessage>
                         {form.formState.errors.name?.message}
                       </FormMessage>
@@ -211,7 +202,7 @@ export default function EtchTab(): JSX.Element {
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className="max-w-[200px]">
-                              Symbol of the rune on RSK. e.g. &quot;UNG&quot;
+                              Symbol of the rune. e.g. &quot;$&quot;
                             </p>
                           </TooltipContent>
                         </Tooltip>

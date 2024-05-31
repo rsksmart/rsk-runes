@@ -10,38 +10,76 @@ import {
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
+import { useRuneERC20 } from '@/app/utils/hooks/useRuneERC20'
+import { FormData } from './EtchTab'
+import { ethers } from 'ethers'
 
 type Props = {
   isProcessing: boolean
   setIsProcessing: (isProcessing: boolean) => void
+  runeProps: FormData
+}
+
+async function getConfirmations(hash: string) {
+  return 2 * 2
+}
+
+async function isConfirmed(hash: string) {
+  return 2 === 2
 }
 
 export default function LastEtchTab({
   isProcessing,
   setIsProcessing,
+  runeProps
 }: Props): JSX.Element {
-  const [commitConfirmations, setCommitConfirmations] = useState<number | null>(
-    null
-  )
-  const [revealConfirm, setRevealConfirm] = useState<boolean>(false)
-  const [progress, setProgress] = useState<number>(0)
-  useEffect(() => {
-    if (localStorage.getItem('commitData')) {
-      setIsProcessing(true)
-      reCheckState()
-    }
-  }, [localStorage.getItem('commitData')])
+  const [confirmations, setConfirmations] = useState(0)
+  const { name, symbol, premine, amount, cap, address, divisibility } = runeProps
 
-  const reCheckState = async () => {
-    const commitData = JSON.parse(localStorage.getItem('commitData') || '{}')
-    const { commitTxHash, scriptP2trAddress, tapLeafScript } = commitData
-    const confirmations = await getConfirmations(commitTxHash) //returns number of confirmations for the commit transaction
-    setProgress(confirmations > 0 ? (confirmations / 6) * 100 : 0)
+  const progress = useMemo(() => {
+    return confirmations ? Math.round(confirmations / 7 * 100) : 0
+  }, [confirmations])
+
+  const maxSupply = Math.round((+premine! + +amount! * +cap!) / Math.pow(10, +divisibility!))
+
+  const {
+    tokenAddress,
+    getTokenAddress,
+    createRune,
+    loadingCreateRune,
+    txStatus, // possible states are: 'pending', 'success', 'error'
+    createReceipt, // TX receipt for the createRune transaction
+  } = useRuneERC20({
+    name,
+    symbol,
+    initialSupply: ethers.parseUnits(String(premine), divisibility),
+    initialOwner: address,
+    runeID: '1001',
+    _mintAmount: ethers.parseUnits(amount ? String(amount) : String(0), divisibility!),
+    _maxSupply: ethers.parseUnits(isNaN(maxSupply) ? String(0) : String(maxSupply), divisibility!)
+  })
+
+  useEffect(() => {
+    if (localStorage.getItem('revealData') || localStorage.getItem('commitData')) {
+      setIsProcessing(true)
+      checkStatus()
+    }
+  }, [])
+
+  async function checkStatus () {
+    const { revealTxHash } = JSON.parse(localStorage.getItem('reavealData') || '{}')
+
+    if (revealTxHash) {
+      const confirmed = await isConfirmed(revealTxHash)
+      if (confirmed) setConfirmations(confirmations => confirmations + 1)
+    } else {
+      const { commitTxHash } = JSON.parse(localStorage.getItem('commitData') || '{}')
+      const confirmations = await getConfirmations(commitTxHash)
+      setConfirmations(confirmations)
+    }
   }
-  const getConfirmations = async (commitTxHash: string) => {
-    return 1
-  }
+
   return (
     <TabsContent value="lastEtch">
       <Card>
@@ -51,7 +89,7 @@ export default function LastEtchTab({
             Information about the Last Etch token.
           </CardDescription>
         </CardHeader>
-        {!isProcessing ? (
+        {isProcessing ? (
           <div>No data </div>
         ) : (
           <CardContent className="space-y-4">
@@ -76,7 +114,7 @@ export default function LastEtchTab({
           </CardContent>
         )}
         <CardFooter>
-          <Button>Refresh</Button>
+          <Button onClick={checkStatus}>Refresh</Button>
         </CardFooter>
       </Card>
     </TabsContent>
