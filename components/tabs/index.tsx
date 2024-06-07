@@ -1,10 +1,9 @@
-import { TabsTrigger, TabsList, Tabs } from '@/components/ui/tabs'
+import { TabsTrigger, TabsList, Tabs, TabsContent } from '@/components/ui/tabs'
 import EtchTab, { FormData } from '@/components/tabs/EtchTab'
-import { useState } from 'react'
-import LastEtchTab from './LastEtchTab'
+import { useEffect, useState } from 'react'
+import EtchingProgress from './EtchingProgress'
 
 export default function TabsSection() {
-  const [isProcessing, setIsProcessing] = useState(false)
   const [runeProps, setRuneProps] = useState({
     name: '',
     symbol: '',
@@ -12,27 +11,55 @@ export default function TabsSection() {
     amount: 0,
     cap: 0,
     divisibility: 0,
-    address: ''
+    address: '',
   } as FormData)
+  const [revealTxHash, setRevealTxHash] = useState('')
+  const [commitTxHash, setCommitTxHash] = useState('')
+
+  useEffect(() => {
+    const { revealTxHash, commitTxHash, runeProps } = JSON.parse(
+      localStorage.getItem('runeData') || '{}'
+    )
+
+    if (runeProps) {
+      setRuneProps(runeProps)
+      setRevealTxHash(revealTxHash || '')
+      setCommitTxHash(commitTxHash || '')
+    }
+  }, [])
 
   return (
-    <Tabs className="w-full max-w-2xl" defaultValue="etch">
-      <TabsList className="grid grid-cols-2 w-full">
+    <Tabs
+      className="w-full max-w-2xl flex flex-col items-center"
+      defaultValue="etch"
+    >
+      <TabsList className="grid grid-cols-2 w-fit">
         <TabsTrigger value="etch">Etch</TabsTrigger>
-        <TabsTrigger value="lastEtch">Last Etch</TabsTrigger>
+        <TabsTrigger disabled value="mint">
+          mint
+        </TabsTrigger>
       </TabsList>
-      <EtchTab setRuneProps={setRuneProps}/>
-      <LastEtchTab
-        isProcessing={isProcessing}
-        setIsProcessing={setIsProcessing}
-        runeProps={runeProps}
-      />
-      <div>
-        {/* <h1>Runes</h1>
+      <TabsContent value="etch">
+        {!commitTxHash ? (
+          <EtchTab
+            setRuneProps={setRuneProps}
+            setRevealTxHash={setRevealTxHash}
+            setCommitTxHash={setCommitTxHash}
+          />
+        ) : (
+          <EtchingProgress
+            runeProps={runeProps}
+            revealTxHash={revealTxHash}
+            commitTxHash={commitTxHash}
+          />
+        )}
+      </TabsContent>
+      {/* <div>
+        <h1>Runes</h1>
         <button onClick={getTokenAddress}>Get Token Address</button>
         <button onClick={createRune}>Create Rune</button>
-        {tokenAddress && <p>Token Address: {tokenAddress}</p>} */}
-      </div>
+        {tokenAddress && <p>Token Address: {tokenAddress}</p>}
+      </div> */}
     </Tabs>
   )
 }
