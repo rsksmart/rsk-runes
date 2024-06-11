@@ -7,11 +7,10 @@ import {
   findUtxo,
   waitForTxToBeConfirmed,
   getRuneIdByName,
+  // @ts-ignore
 } from 'bc-runes-js'
-import { forwardRef, ChangeEvent } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -36,83 +35,17 @@ import {
   FormControl,
   FormMessage,
 } from '@/components/ui/form'
-
-const formSchema = z.object({
-  name: z
-    .string()
-    .min(1, {
-      message: 'Name must be at least 1 characters.',
-    })
-    .max(24, {
-      message: 'Name cannot exceed 24 characters.',
-    }),
-  symbol: z
-    .string()
-    .length(1, { message: 'Symbol must be a single character.' }),
-  premine: z.string(),
-  amount: z.string().min(0, { message: 'Amount is required.' }),
-  cap: z.string().min(0, { message: 'Cap is required.' }),
-  divisibility: z
-    .string()
-    .max(38, { message: 'Divisibility cannot be higher than 38.' }),
-  address: z
-    .string()
-    .length(42, { message: 'Address cannot exceed 42 characters.' }),
-})
-
-export interface FormData {
-  name?: string
-  symbol?: string
-  premine?: number
-  amount?: number
-  cap?: number
-  divisibility?: number
-  address?: string
-}
-
-interface CustomInputProps {
-  value?: string
-  onChange: (value: string) => void
-  id: string
-  placeholder: string
-  className?: string
-}
-
-const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
-  ({ value, onChange, id, placeholder, className }, ref) => {
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-      let inputValue = e.target.value.toUpperCase()
-      inputValue = inputValue.replace(/\s+/g, '•')
-      inputValue = inputValue.replace(/•{2,}/g, '•')
-      onChange(inputValue)
-    }
-
-    return (
-      <Input
-        ref={ref}
-        value={value}
-        onChange={handleChange}
-        id={id}
-        placeholder={placeholder}
-        className={className}
-      />
-    )
-  }
-)
-
-CustomInput.displayName = 'CustomInput'
-
-interface Props {
-  setRuneProps: Function
-  setRevealTxHash: Function
-  setCommitTxHash: Function
-}
+import { CustomInput } from './CustomInput'
+import { EtchTabProps, FormData } from '@/app/utils/types'
+import { formSchema } from '@/app/utils/schemas'
+import { useToast } from '@/components/ui/use-toast'
 
 export default function EtchTab({
   setRuneProps,
   setRevealTxHash,
   setCommitTxHash,
-}: Props): JSX.Element {
+}: EtchTabProps): JSX.Element {
+  const { toast } = useToast()
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -126,28 +59,32 @@ export default function EtchTab({
     },
   })
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = (data: FormData) => {
     setRuneProps(data)
+    localStorage.setItem('runeData', JSON.stringify({ runeProps: data }))
+    handleEtch(data)
+  }
 
+  const handleEtch = async (data: FormData) => {
     try {
-      const response = await fetch('/api/etch-rune', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        console.log('Error:', error.error)
+      const alreadyExists = await getRuneIdByName(data.name)
+      if (alreadyExists) {
+        toast({
+          title: 'Rune already exists',
+          description: 'Please choose a different name',
+          variant: 'destructive',
+        })
         return
       }
-
-      const result = await response.json()
-      console.log(result)
+      const commitData = await commitTx({ name: data.name })
+      const { commitTxHash, scriptP2trAddress, tapLeafScript } = commitData
+      // setCommitTxHash(commitTxHash)
+      localStorage.setItem(
+        'runeData',
+        JSON.stringify({ runeProps: data, commitTxHash })
+      )
     } catch (error) {
-      console.log('Error on submit:', error)
+      console.error('Error etching rune:', error)
     }
   }
 

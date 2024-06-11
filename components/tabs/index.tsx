@@ -1,10 +1,11 @@
 import { TabsTrigger, TabsList, Tabs, TabsContent } from '@/components/ui/tabs'
-import EtchTab, { FormData } from '@/components/tabs/EtchTab'
+import EtchTab from '@/components/tabs/EtchTab'
 import { useEffect, useState } from 'react'
 import EtchingProgress from './EtchingProgress'
+import { FormData } from '@/app/utils/types'
 
 export default function TabsSection() {
-  const [runeProps, setRuneProps] = useState({
+  const [runeProps, setRuneProps] = useState<FormData>({
     name: '',
     symbol: '',
     premine: 0,

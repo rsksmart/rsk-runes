@@ -11,9 +11,10 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { useEffect, useState, useMemo } from 'react'
 import { useRuneERC20 } from '@/app/utils/hooks/useRuneERC20'
-import { FormData } from './EtchTab'
+// @ts-ignore
 import { getConfirmations, isConfirmed } from 'bc-runes-js'
 import { formatAddress } from '@/lib/utils'
+import { FormData } from '@/app/utils/types'
 
 type Props = {
   runeProps: FormData
