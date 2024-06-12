@@ -9,17 +9,17 @@ import {
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { useEffect, useState, useMemo } from 'react'
-import { useRuneERC20 } from '@/app/utils/hooks/useRuneERC20'
-// @ts-ignore
-import { getConfirmations, isConfirmed } from 'bc-runes-js'
+import { useEffect, useState } from 'react'
 import { formatAddress } from '@/lib/utils'
 import { FormData } from '@/app/utils/types'
+// @ts-ignore
+import { getConfirmations, isConfirmed } from 'bc-runes-js'
+import { toast } from 'react-toastify'
 
 type Props = {
   runeProps: FormData
-  revealTxHash: string
-  commitTxHash: string
+  revealTxHash: string | null
+  commitTxHash: string | null
 }
 
 export default function EtchingProgress({
@@ -28,34 +28,40 @@ export default function EtchingProgress({
   commitTxHash,
 }: Props): JSX.Element {
   const [confirmations, setConfirmations] = useState(0)
+  const [progress, setProgress] = useState(0)
   const { name, symbol, address: owner } = runeProps
-
-  const progress = useMemo(() => {
-    return confirmations ? Math.round((confirmations / 7) * 100) : 0
-  }, [confirmations])
 
   useEffect(() => {
     checkStatus()
-  }, [])
+  }, [revealTxHash])
+
+  useEffect(() => {
+    if (progress >= 100) {
+      continueEtching()
+    }
+  }, [progress])
+
+  useEffect(() => {
+    setProgress(Math.round((confirmations / 7) * 100))
+  }, [confirmations])
 
   async function checkStatus() {
+    console.log('checking status')
+    console.log('revealTxHash:', revealTxHash)
     if (revealTxHash) {
-      const confirmed = await isConfirmed(revealTxHash)
-      if (confirmed) setConfirmations((confirmations) => confirmations + 1)
+      console.log('revealTxHash is for getting confirmations:', revealTxHash)
+      const confirmations = await isConfirmed(revealTxHash)
+      toast.success('Rune has been Etched!')
     } else {
+      console.log('commitTxHash is for getting confirmations:', commitTxHash)
       const confirmations = await getConfirmations(commitTxHash)
       setConfirmations(confirmations)
+      console.log('confirmations are:', confirmations)
     }
   }
 
   async function continueEtching() {
-    const response = await fetch('/api/etch-rune', {
-      body: JSON.stringify({ revealTxHash, commitTxHash }),
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
+    console.log('ON continue etching')
   }
 
   return (
@@ -80,7 +86,7 @@ export default function EtchingProgress({
           <Progress className="w-full" value={progress} />
           <p className="text-sm text-gray-500 dark:text-gray-400">
             The Last Etch token is a limited edition. The progress is currently
-            at 70%.
+            at {progress}%.
           </p>
         </div>
       </CardContent>

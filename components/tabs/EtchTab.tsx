@@ -1,14 +1,5 @@
 'use client'
-
-import {
-  commitTx,
-  waitForTxToMature,
-  revealTx,
-  findUtxo,
-  waitForTxToBeConfirmed,
-  getRuneIdByName,
-  // @ts-ignore
-} from 'bc-runes-js'
+import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
@@ -38,14 +29,15 @@ import {
 import { CustomInput } from './CustomInput'
 import { EtchTabProps, FormData } from '@/app/utils/types'
 import { formSchema } from '@/app/utils/schemas'
-import { useToast } from '@/components/ui/use-toast'
+import { toast } from 'react-toastify'
+import { postRequest, getRequest } from '@/app/utils/apiRequests'
+// import { useToast } from '@/components/ui/use-toast'
 
 export default function EtchTab({
   setRuneProps,
   setRevealTxHash,
   setCommitTxHash,
 }: EtchTabProps): JSX.Element {
-  const { toast } = useToast()
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -67,22 +59,43 @@ export default function EtchTab({
 
   const handleEtch = async (data: FormData) => {
     try {
-      const alreadyExists = await getRuneIdByName(data.name)
-      if (alreadyExists) {
-        toast({
-          title: 'Rune already exists',
-          description: 'Please choose a different name',
-          variant: 'destructive',
-        })
+      console.log('Etching rune:', data.name)
+      const response = await getRequest(
+        `/api/etch-rune?name=${data.name}&action=getByname`
+      )
+      console.log('json', response.hasRuneByID)
+      if (response.hasRuneByID) {
+        toast.error('Rune already exists. Please choose a different name.')
+        return
+      } else {
+        toast.success('Rune does not exist. Proceeding with etching.')
+      }
+      if (!data.name) {
+        toast.error('Name is required')
         return
       }
-      const commitData = await commitTx({ name: data.name })
+      const commitData = await postRequest({
+        name: data.name,
+        action: 'commitTx',
+      })
+      console.log('commitData', commitData)
       const { commitTxHash, scriptP2trAddress, tapLeafScript } = commitData
-      // setCommitTxHash(commitTxHash)
+      console.log('committxhash after commit:', commitTxHash)
+      console.log('scriptP2trAddress after commit:', scriptP2trAddress)
+      console.log('tapLeafScript after commit:', tapLeafScript)
+      setCommitTxHash(commitTxHash)
       localStorage.setItem(
         'runeData',
         JSON.stringify({ runeProps: data, commitTxHash })
       )
+      return
+      // const commitData = await commitTx({ name: data.name })
+      // const { commitTxHash, scriptP2trAddress, tapLeafScript } = commitData
+      // setCommitTxHash(commitTxHash)
+      // localStorage.setItem(
+      //   'runeData',
+      //   JSON.stringify({ runeProps: data, commitTxHash })
+      // )
     } catch (error) {
       console.error('Error etching rune:', error)
     }

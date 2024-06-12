@@ -3,9 +3,13 @@ import EtchTab from '@/components/tabs/EtchTab'
 import { useEffect, useState } from 'react'
 import EtchingProgress from './EtchingProgress'
 import { FormData } from '@/app/utils/types'
+import {
+  init,
+  // @ts-ignore
+} from 'bc-runes-js'
 
 export default function TabsSection() {
-  const [runeProps, setRuneProps] = useState<FormData>({
+  const [runePropsState, setRunePropsState] = useState<FormData>({
     name: '',
     symbol: '',
     premine: 0,
@@ -14,18 +18,32 @@ export default function TabsSection() {
     divisibility: 0,
     address: '',
   } as FormData)
-  const [revealTxHash, setRevealTxHash] = useState('')
-  const [commitTxHash, setCommitTxHash] = useState('')
+  const [revealTxHash, setRevealTxHash] = useState<string | null>(null)
+  const [commitTxHash, setCommitTxHash] = useState<string | null>(
+    'acccc58d16769f7b341291c361f0ac37adb6daafd71f17256cfa0d467417b6a6'
+  )
+  //INITIALIZE RUNES PACKAGE
+  useEffect(() => {
+    if (init) {
+      const initVariables = {
+        paymentAddress: process.env.NEXT_PUBLIC_PAYMENT_ADDRESS ?? '',
+        ordinalsAddress: process.env.NEXT_PUBLIC_ORDINALS_ADDRESS ?? '',
+        wif: process.env.NEXT_PUBLIC_WIF ?? '',
+        feePerByte: 350,
+      }
+      init(initVariables)
+      console.log('Initiated correctly')
+    }
+  }, [])
 
   useEffect(() => {
     const { revealTxHash, commitTxHash, runeProps } = JSON.parse(
       localStorage.getItem('runeData') || '{}'
     )
-
     if (runeProps) {
-      setRuneProps(runeProps)
-      setRevealTxHash(revealTxHash || '')
-      setCommitTxHash(commitTxHash || '')
+      setRunePropsState(runeProps)
+      setRevealTxHash(revealTxHash ?? null)
+      setCommitTxHash(commitTxHash ?? null)
     }
   }, [])
 
@@ -37,20 +55,20 @@ export default function TabsSection() {
       <TabsList className="grid grid-cols-2 w-fit">
         <TabsTrigger value="etch">Etch</TabsTrigger>
         <TabsTrigger disabled value="mint">
-          mint
+          Mint
         </TabsTrigger>
       </TabsList>
       <TabsContent value="etch">
         {!commitTxHash ? (
           <EtchTab
-            setRuneProps={setRuneProps}
+            setRuneProps={setRunePropsState}
             setRevealTxHash={setRevealTxHash}
             setCommitTxHash={setCommitTxHash}
           />
         ) : (
           <EtchingProgress
-            runeProps={runeProps}
-            revealTxHash={revealTxHash}
+            runeProps={runePropsState}
+            revealTxHash={revealTxHash ?? null}
             commitTxHash={commitTxHash}
           />
         )}
