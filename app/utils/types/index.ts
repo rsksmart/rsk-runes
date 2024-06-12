@@ -10,6 +10,5 @@ export interface FormData {
 
 export interface EtchTabProps {
   setRuneProps: Function
-  setRevealTxHash: Function
   setCommitTxHash: Function
 }

@@ -15,50 +15,132 @@ import { FormData } from '@/app/utils/types'
 // @ts-ignore
 import { getConfirmations, isConfirmed } from 'bc-runes-js'
 import { toast } from 'react-toastify'
+import { postRequest } from '@/app/utils/apiRequests'
 
 type Props = {
   runeProps: FormData
-  revealTxHash: string | null
   commitTxHash: string | null
+  setRevealTxHash: (revealTxHash: string) => void
+  revealTxHash: string | null
+  etchedFinished: boolean
+  setEtchedFinished: (etchedFinished: boolean) => void
 }
 
 export default function EtchingProgress({
   runeProps,
-  revealTxHash,
   commitTxHash,
+  setRevealTxHash,
+  revealTxHash,
+  etchedFinished,
+  setEtchedFinished,
 }: Props): JSX.Element {
-  const [confirmations, setConfirmations] = useState(0)
+  const [commitConfirmations, setCommitConfirmations] = useState(0)
   const [progress, setProgress] = useState(0)
+  const commitConfirmationsThreshold = 6
   const { name, symbol, address: owner } = runeProps
 
   useEffect(() => {
-    checkStatus()
-  }, [revealTxHash])
+    updateStatus()
+    const interval = setInterval(() => {
+      updateStatus()
+    }, 10000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   useEffect(() => {
-    if (progress >= 100) {
-      continueEtching()
+    setProgress(
+      Math.round((commitConfirmations / commitConfirmationsThreshold) * 100)
+    )
+    if (commitConfirmations >= commitConfirmationsThreshold) {
+      executeRevealTxHash()
     }
-  }, [progress])
+  }, [commitConfirmations])
 
-  useEffect(() => {
-    setProgress(Math.round((confirmations / 7) * 100))
-  }, [confirmations])
-
-  async function checkStatus() {
-    console.log('checking status')
-    console.log('revealTxHash:', revealTxHash)
-    if (revealTxHash) {
-      console.log('revealTxHash is for getting confirmations:', revealTxHash)
-      const confirmations = await isConfirmed(revealTxHash)
-      toast.success('Rune has been Etched!')
-    } else {
-      console.log('commitTxHash is for getting confirmations:', commitTxHash)
-      const confirmations = await getConfirmations(commitTxHash)
-      setConfirmations(confirmations)
-      console.log('confirmations are:', confirmations)
+  async function updateStatus() {
+    try {
+      if (revealTxHash) {
+        const confirmed = await isConfirmed(revealTxHash)
+        //TODO show success message on the screen and execute factory contract
+        setEtchedFinished(confirmed)
+        if (confirmed) console.log('the rune has been etched')
+      } else if (commitTxHash) {
+        const confirmations = await getConfirmations(commitTxHash)
+        setCommitConfirmations(confirmations)
+      }
+    } catch (error) {
+      console.log('Error on updateStatus:', error)
     }
   }
+  async function executeRevealTxHash() {
+    try {
+      localStorage.getItem('runeData')
+      if (localStorage.getItem('runeData')) {
+        let data = JSON.parse(localStorage.getItem('runeData')!)
+        console.log(
+          'revealTxHash in executeRevealTxHash:',
+          data.scriptP2trAddress
+        )
+        console.log('commitTxHash in tapLeafScript:', data.tapLeafScript)
+
+        const controlBlock = data.tapLeafScript[0].controlBlock.data
+
+        const { revealTxHash } = await postRequest({
+          action: 'revealTx',
+          scriptP2trAddress: data.scriptP2trAddress,
+          tapLeafScript: {
+            ...data.tapLeafScript[0],
+            controlBlock,
+          },
+          commitTxHash: data.commitTxHash,
+          ...data.runeProps,
+        })
+        console.log('commitData:', revealTxHash)
+        localStorage.setItem(
+          'runeData',
+          JSON.stringify({
+            runeProps: data.runeProps,
+            commitTxHash: data.commitTxHash,
+            scriptP2trAddress: data.scriptP2trAddress,
+            tapLeafScript: data.tapLeafScript,
+            revealTxHash: revealTxHash,
+          })
+        )
+        setRevealTxHash(revealTxHash)
+      }
+    } catch (error) {
+      console.log('Error on executeRevealTxHash:', error)
+    }
+  }
+
+  // async function updateStatus() {
+  //   console.log('checking status')
+  //   console.log('revealTxHash:', revealTxHash)
+  //   if (revealTxHash) {
+  //     // console.log('revealTxHash is for getting confirmations:', revealTxHash)
+  //     // const confirmed = await isConfirmed(revealTxHash)
+  //     // if (confirmed) {
+  //     //   toast.success('Rune has been Etched!')
+  //     //   //TODO show success message on the screen and execute factory contract
+  //     // } else {
+  //     //   const confirmations = await getConfirmations(revealTxHash)
+  //     //   setConfirmations(confirmations)
+  //     // }
+  //   } else {
+  //     const confirmations = await getConfirmations(commitTxHash)
+  //     setConfirmations(confirmations)
+  //     console.log('confirmations are:', confirmations)
+  //     if (commitTxMatured) {
+
+  //     } else {
+  //       console.log('commitTxHash is for getting confirmations:', commitTxHash)
+  //       if (confirmations >= confirmationsThreshold) {
+  //         toast.success('Rune has been Etched!')
+  //         setCommitTxMatured(true)
+  //       }
+  //     }
+  //   }
+  // }
 
   async function continueEtching() {
     console.log('ON continue etching')
@@ -91,7 +173,7 @@ export default function EtchingProgress({
         </div>
       </CardContent>
       <CardFooter>
-        <Button onClick={checkStatus}>Refresh</Button>
+        <Button>Etching Rune ...</Button>
       </CardFooter>
     </Card>
   )
