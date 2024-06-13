@@ -33,7 +33,25 @@ export async function POST(request: NextRequest) {
       cap,
       address,
       divisibility,
+      scriptP2trAddress,
+      tapLeafScript,
     } = data
+    const deserializedTapLeafScript = tapLeafScript.map((item: any) => ({
+      controlBlock: Buffer.from(item.controlBlock, 'base64'),
+      leafVersion: item.leafVersion,
+      script: Buffer.from(item.script, 'base64'),
+    }))
+
+    const initVariables = {
+      paymentAddress: process.env.NEXT_PUBLIC_PAYMENT_ADDRESS ?? '',
+      ordinalsAddress: process.env.NEXT_PUBLIC_ORDINALS_ADDRESS ?? '',
+      wif: process.env.NEXT_PUBLIC_WIF ?? '',
+      feePerByte: 350,
+    }
+    console.log('initVariables:', initVariables)
+
+    init(initVariables)
+    console.log('Initiated correctly')
 
     switch (action) {
       case 'commitTx':
@@ -48,6 +66,24 @@ export async function POST(request: NextRequest) {
           scriptP2trAddress,
           tapLeafScript,
         })
+      case 'revealTx':
+        const commitUtxo = await findUtxo(
+          data.scriptP2trAddress,
+          data.commitTxHash
+        )
+        console.log('commitUtxo:', commitUtxo)
+        console.log(data)
+        commitUtxo.tapLeafScript = deserializedTapLeafScript
+        const { revealTxHash } = await revealTx({
+          commitUtxo,
+          name,
+          amount,
+          cap,
+          symbol,
+          divisibility,
+          premine,
+        })
+        return NextResponse.json({ revealTxHash })
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }

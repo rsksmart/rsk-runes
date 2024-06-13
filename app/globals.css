@@ -89,11 +89,11 @@ body {
 }
 
 .btn-outline {
-  @apply relative w-[120px] h-[36px] border-[1px] rounded-full
+  @apply relative w-max h-[36px] border-[1px] rounded-full
 }
 
 .btn-outline::before {
-  @apply absolute w-[120px] h-[36px] top-[3px] left-[1px] z-[-1] border-[1px] border-white rounded-full;
+  @apply absolute w-[175px] h-[36px] top-[3px] left-[1px] z-[-1] border-[1px] border-white rounded-full;
   content: "";
 }
 

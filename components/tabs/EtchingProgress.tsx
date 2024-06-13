@@ -9,56 +9,121 @@ import {
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { formatAddress } from '@/lib/utils'
 import { FormData } from '@/app/utils/types'
 // @ts-ignore
 import { getConfirmations, isConfirmed } from 'bc-runes-js'
 import { toast } from 'react-toastify'
+import { postRequest } from '@/app/utils/apiRequests'
 
 type Props = {
   runeProps: FormData
-  revealTxHash: string | null
   commitTxHash: string | null
+  setRevealTxHash: (revealTxHash: string) => void
+  revealTxHash: string | null
+  etchedFinished: boolean
+  setEtchedFinished: (etchedFinished: boolean) => void
 }
 
 export default function EtchingProgress({
   runeProps,
-  revealTxHash,
   commitTxHash,
+  setRevealTxHash,
+  revealTxHash,
+  etchedFinished,
+  setEtchedFinished,
 }: Props): JSX.Element {
-  const [confirmations, setConfirmations] = useState(0)
+  const [commitConfirmations, setCommitConfirmations] = useState(0)
   const [progress, setProgress] = useState(0)
+  const commitConfirmationsThreshold = 6
   const { name, symbol, address: owner } = runeProps
 
-  useEffect(() => {
-    checkStatus()
-  }, [revealTxHash])
+  const updateStatus = useCallback(async () => {
+    try {
+      console.log('revealTxHash on callback is', revealTxHash)
+      if (revealTxHash) {
+        const confirmed = await isConfirmed(revealTxHash)
+        //TODO show success message on the screen and execute factory contract
+        setEtchedFinished(confirmed)
+        console.log('is confirmed?', confirmed)
+        if (confirmed) console.log('the rune has been etched')
+      } else if (commitTxHash) {
+        console.log('commitTxHash in updateStatus:', commitTxHash)
 
-  useEffect(() => {
-    if (progress >= 100) {
-      continueEtching()
+        const confirmations = await getConfirmations(commitTxHash)
+        setCommitConfirmations(confirmations)
+      }
+    } catch (error) {
+      console.log('Error on updateStatus:', error)
     }
-  }, [progress])
+  }, [revealTxHash, commitTxHash, setEtchedFinished])
+
+  const executeRevealTxHash = useCallback(async () => {
+    try {
+      if (localStorage.getItem('runeData')) {
+        let data = JSON.parse(localStorage.getItem('runeData')!)
+        console.log(
+          'revealTxHash in executeRevealTxHash:',
+          data.scriptP2trAddress
+        )
+        console.log('commitTxHash in tapLeafScript:', data.tapLeafScript)
+
+        const tapLeafScript = data.tapLeafScript.map((item: any) => ({
+          controlBlock: Buffer.from(new Uint8Array(item.controlBlock.data)),
+          leafVersion: item.leafVersion,
+          script: Buffer.from(new Uint8Array(item.script.data)),
+        }))
+
+        // Serializar los buffers a base64 para asegurarse de que se envíen correctamente
+        const serializedTapLeafScript = tapLeafScript.map((item: any) => ({
+          controlBlock: item.controlBlock.toString('base64'),
+          leafVersion: item.leafVersion,
+          script: item.script.toString('base64'),
+        }))
+
+        const { revealTxHash } = await postRequest({
+          action: 'revealTx',
+          scriptP2trAddress: data.scriptP2trAddress,
+          tapLeafScript: serializedTapLeafScript,
+          commitTxHash: data.commitTxHash,
+          ...data.runeProps,
+        })
+        console.log('commitData:', revealTxHash)
+        localStorage.setItem(
+          'runeData',
+          JSON.stringify({
+            runeProps: data.runeProps,
+            commitTxHash: data.commitTxHash,
+            scriptP2trAddress: data.scriptP2trAddress,
+            tapLeafScript: data.tapLeafScript,
+            revealTxHash: revealTxHash,
+          })
+        )
+        setRevealTxHash(revealTxHash)
+      }
+    } catch (error) {
+      console.log('Error on executeRevealTxHash:', error)
+    }
+  }, [setRevealTxHash])
 
   useEffect(() => {
-    setProgress(Math.round((confirmations / 7) * 100))
-  }, [confirmations])
+    updateStatus()
+    const interval = setInterval(() => {
+      updateStatus()
+    }, 10000)
 
-  async function checkStatus() {
-    console.log('checking status')
-    console.log('revealTxHash:', revealTxHash)
-    if (revealTxHash) {
-      console.log('revealTxHash is for getting confirmations:', revealTxHash)
-      const confirmations = await isConfirmed(revealTxHash)
-      toast.success('Rune has been Etched!')
-    } else {
-      console.log('commitTxHash is for getting confirmations:', commitTxHash)
-      const confirmations = await getConfirmations(commitTxHash)
-      setConfirmations(confirmations)
-      console.log('confirmations are:', confirmations)
+    return () => clearInterval(interval)
+  }, [updateStatus])
+
+  useEffect(() => {
+    setProgress(
+      Math.round((commitConfirmations / commitConfirmationsThreshold) * 100)
+    )
+    if (commitConfirmations >= commitConfirmationsThreshold) {
+      executeRevealTxHash()
     }
-  }
+  }, [commitConfirmations, executeRevealTxHash])
 
   async function continueEtching() {
     console.log('ON continue etching')
@@ -66,9 +131,11 @@ export default function EtchingProgress({
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="space-x-20 w-50">
         <CardTitle>{name}</CardTitle>
-        <CardDescription>Information about the rune: {name}.</CardDescription>
+        <CardDescription className="text-left w-100">
+          Information about the rune: {name}.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
@@ -82,21 +149,31 @@ export default function EtchingProgress({
           </div>
         </div>
         <div className="space-y-2">
-          <Label>Progress</Label>
+          <Label>Step 1. Etching Progress</Label>
           <Progress className="w-full" value={progress} />
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            The Last Etch token is a limited edition. The progress is currently
-            at {progress}%.
+            {revealTxHash
+              ? etchedFinished
+                ? 'Etching process has been confirmed successfully, proceeding with minting . . .'
+                : 'The Etching process has been completed, waiting for confirmation . . .'
+              : `The Etching progress is currently at ${progress > 100 ? 100 : progress}%.`}
           </p>
         </div>
+        {etchedFinished && (
+          <div className="space-y-2">
+            <Label>Step 2. Minting Rune in Rootstock network Progress</Label>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {"Creating your rune's token in the Rootstock network"}
+            </p>
+          </div>
+        )}
       </CardContent>
       <CardFooter className='relative z-0 justify-end p-6'>
         <Button
-          onClick={checkStatus}
           variant={'outline'}
-          className='bg-white text-black'
+          className='bg-white text-black before:w-[130px]'
         >
-          Refresh
+          {etchedFinished ? 'Minting tokens' : 'Etching Rune ...'}
         </Button>
       </CardFooter>
     </Card>

@@ -1,6 +1,8 @@
 interface commitTxData {
-  name: string
   action: string
+  name?: string
+  scriptP2trAddress?: string
+  tapLeafScript?: string
 }
 export const getRequest = async (url: string) => {
   try {

@@ -3,10 +3,6 @@ import EtchTab from '@/components/tabs/EtchTab'
 import { useEffect, useState } from 'react'
 import EtchingProgress from './EtchingProgress'
 import { FormData } from '@/app/utils/types'
-import {
-  init,
-  // @ts-ignore
-} from 'bc-runes-js'
 
 export default function TabsSection() {
   const [runePropsState, setRunePropsState] = useState<FormData>({
@@ -18,23 +14,9 @@ export default function TabsSection() {
     divisibility: 0,
     address: '',
   } as FormData)
+  const [commitTxHash, setCommitTxHash] = useState<string | null>(null)
   const [revealTxHash, setRevealTxHash] = useState<string | null>(null)
-  const [commitTxHash, setCommitTxHash] = useState<string | null>(
-    'acccc58d16769f7b341291c361f0ac37adb6daafd71f17256cfa0d467417b6a6'
-  )
-  //INITIALIZE RUNES PACKAGE
-  useEffect(() => {
-    if (init) {
-      const initVariables = {
-        paymentAddress: process.env.NEXT_PUBLIC_PAYMENT_ADDRESS ?? '',
-        ordinalsAddress: process.env.NEXT_PUBLIC_ORDINALS_ADDRESS ?? '',
-        wif: process.env.NEXT_PUBLIC_WIF ?? '',
-        feePerByte: 350,
-      }
-      init(initVariables)
-      console.log('Initiated correctly')
-    }
-  }, [])
+  const [etchedFinished, setEtchedFinished] = useState(false)
 
   useEffect(() => {
     const { revealTxHash, commitTxHash, runeProps } = JSON.parse(
@@ -46,6 +28,10 @@ export default function TabsSection() {
       setCommitTxHash(commitTxHash ?? null)
     }
   }, [])
+
+  useEffect(() => {
+    console.log('new revealtxhash is ', revealTxHash)
+  }, [revealTxHash])
 
   return (
     <Tabs
@@ -62,14 +48,16 @@ export default function TabsSection() {
         {!commitTxHash ? (
           <EtchTab
             setRuneProps={setRunePropsState}
-            setRevealTxHash={setRevealTxHash}
             setCommitTxHash={setCommitTxHash}
           />
         ) : (
           <EtchingProgress
             runeProps={runePropsState}
-            revealTxHash={revealTxHash ?? null}
             commitTxHash={commitTxHash}
+            setRevealTxHash={setRevealTxHash}
+            revealTxHash={revealTxHash}
+            etchedFinished={etchedFinished}
+            setEtchedFinished={setEtchedFinished}
           />
         )}
       </TabsContent>
