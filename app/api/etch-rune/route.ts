@@ -36,6 +36,12 @@ export async function POST(request: NextRequest) {
       scriptP2trAddress,
       tapLeafScript,
     } = data
+    const deserializedTapLeafScript = tapLeafScript.map((item: any) => ({
+      controlBlock: Buffer.from(item.controlBlock, 'base64'),
+      leafVersion: item.leafVersion,
+      script: Buffer.from(item.script, 'base64'),
+    }))
+
     const initVariables = {
       paymentAddress: process.env.NEXT_PUBLIC_PAYMENT_ADDRESS ?? '',
       ordinalsAddress: process.env.NEXT_PUBLIC_ORDINALS_ADDRESS ?? '',
@@ -67,7 +73,7 @@ export async function POST(request: NextRequest) {
         )
         console.log('commitUtxo:', commitUtxo)
         console.log(data)
-        commitUtxo.tapLeafScript = data.tapLeafScript
+        commitUtxo.tapLeafScript = deserializedTapLeafScript
         const { revealTxHash } = await revealTx({
           commitUtxo,
           name,

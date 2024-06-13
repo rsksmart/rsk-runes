@@ -9,7 +9,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { formatAddress } from '@/lib/utils'
 import { FormData } from '@/app/utils/types'
 // @ts-ignore
@@ -39,42 +39,29 @@ export default function EtchingProgress({
   const commitConfirmationsThreshold = 6
   const { name, symbol, address: owner } = runeProps
 
-  useEffect(() => {
-    updateStatus()
-    const interval = setInterval(() => {
-      updateStatus()
-    }, 10000)
-
-    return () => clearInterval(interval)
-  }, [])
-
-  useEffect(() => {
-    setProgress(
-      Math.round((commitConfirmations / commitConfirmationsThreshold) * 100)
-    )
-    if (commitConfirmations >= commitConfirmationsThreshold) {
-      executeRevealTxHash()
-    }
-  }, [commitConfirmations])
-
-  async function updateStatus() {
+  const updateStatus = useCallback(async () => {
     try {
+      console.log('revealTxHash on callback is', revealTxHash)
       if (revealTxHash) {
         const confirmed = await isConfirmed(revealTxHash)
         //TODO show success message on the screen and execute factory contract
         setEtchedFinished(confirmed)
+        console.log('is confirmed?', confirmed)
+
         if (confirmed) console.log('the rune has been etched')
       } else if (commitTxHash) {
+        console.log('commitTxHash in updateStatus:', commitTxHash)
+
         const confirmations = await getConfirmations(commitTxHash)
         setCommitConfirmations(confirmations)
       }
     } catch (error) {
       console.log('Error on updateStatus:', error)
     }
-  }
-  async function executeRevealTxHash() {
+  }, [revealTxHash, commitTxHash, setEtchedFinished])
+
+  const executeRevealTxHash = useCallback(async () => {
     try {
-      localStorage.getItem('runeData')
       if (localStorage.getItem('runeData')) {
         let data = JSON.parse(localStorage.getItem('runeData')!)
         console.log(
@@ -83,15 +70,23 @@ export default function EtchingProgress({
         )
         console.log('commitTxHash in tapLeafScript:', data.tapLeafScript)
 
-        const controlBlock = data.tapLeafScript[0].controlBlock.data
+        const tapLeafScript = data.tapLeafScript.map((item: any) => ({
+          controlBlock: Buffer.from(new Uint8Array(item.controlBlock.data)),
+          leafVersion: item.leafVersion,
+          script: Buffer.from(new Uint8Array(item.script.data)),
+        }))
+
+        // Serializar los buffers a base64 para asegurarse de que se envíen correctamente
+        const serializedTapLeafScript = tapLeafScript.map((item: any) => ({
+          controlBlock: item.controlBlock.toString('base64'),
+          leafVersion: item.leafVersion,
+          script: item.script.toString('base64'),
+        }))
 
         const { revealTxHash } = await postRequest({
           action: 'revealTx',
           scriptP2trAddress: data.scriptP2trAddress,
-          tapLeafScript: {
-            ...data.tapLeafScript[0],
-            controlBlock,
-          },
+          tapLeafScript: serializedTapLeafScript,
           commitTxHash: data.commitTxHash,
           ...data.runeProps,
         })
@@ -111,36 +106,25 @@ export default function EtchingProgress({
     } catch (error) {
       console.log('Error on executeRevealTxHash:', error)
     }
-  }
+  }, [setRevealTxHash])
 
-  // async function updateStatus() {
-  //   console.log('checking status')
-  //   console.log('revealTxHash:', revealTxHash)
-  //   if (revealTxHash) {
-  //     // console.log('revealTxHash is for getting confirmations:', revealTxHash)
-  //     // const confirmed = await isConfirmed(revealTxHash)
-  //     // if (confirmed) {
-  //     //   toast.success('Rune has been Etched!')
-  //     //   //TODO show success message on the screen and execute factory contract
-  //     // } else {
-  //     //   const confirmations = await getConfirmations(revealTxHash)
-  //     //   setConfirmations(confirmations)
-  //     // }
-  //   } else {
-  //     const confirmations = await getConfirmations(commitTxHash)
-  //     setConfirmations(confirmations)
-  //     console.log('confirmations are:', confirmations)
-  //     if (commitTxMatured) {
+  useEffect(() => {
+    updateStatus()
+    const interval = setInterval(() => {
+      updateStatus()
+    }, 10000)
 
-  //     } else {
-  //       console.log('commitTxHash is for getting confirmations:', commitTxHash)
-  //       if (confirmations >= confirmationsThreshold) {
-  //         toast.success('Rune has been Etched!')
-  //         setCommitTxMatured(true)
-  //       }
-  //     }
-  //   }
-  // }
+    return () => clearInterval(interval)
+  }, [updateStatus])
+
+  useEffect(() => {
+    setProgress(
+      Math.round((commitConfirmations / commitConfirmationsThreshold) * 100)
+    )
+    if (commitConfirmations >= commitConfirmationsThreshold) {
+      executeRevealTxHash()
+    }
+  }, [commitConfirmations, executeRevealTxHash])
 
   async function continueEtching() {
     console.log('ON continue etching')

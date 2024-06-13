@@ -29,6 +29,10 @@ export default function TabsSection() {
     }
   }, [])
 
+  useEffect(() => {
+    console.log('new revealtxhash is ', revealTxHash)
+  }, [revealTxHash])
+
   return (
     <Tabs
       className="w-full max-w-2xl flex flex-col items-center"
