@@ -90,8 +90,14 @@ export default function EtchingProgress({
           </p>
         </div>
       </CardContent>
-      <CardFooter>
-        <Button onClick={checkStatus}>Refresh</Button>
+      <CardFooter className='relative z-0 justify-end p-6'>
+        <Button
+          onClick={checkStatus}
+          variant={'outline'}
+          className='bg-white text-black'
+        >
+          Refresh
+        </Button>
       </CardFooter>
     </Card>
   )

@@ -52,13 +52,13 @@ export default function TabsSection() {
       className="w-full max-w-2xl flex flex-col items-center"
       defaultValue="etch"
     >
-      <TabsList className="grid grid-cols-2 w-fit">
+      <TabsList className="grid grid-cols-2 w-fit mb-1">
         <TabsTrigger value="etch">Etch</TabsTrigger>
         <TabsTrigger disabled value="mint">
           Mint
         </TabsTrigger>
       </TabsList>
-      <TabsContent value="etch">
+      <TabsContent value="etch" className='w-full'>
         {!commitTxHash ? (
           <EtchTab
             setRuneProps={setRunePropsState}

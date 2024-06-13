@@ -167,7 +167,6 @@ export default function EtchTab({
                         {...field}
                         placeholder="Enter token symbol"
                         id="symbol"
-                        className="w-[300px]"
                       />
                     </FormControl>
                     <FormMessage>
@@ -202,7 +201,6 @@ export default function EtchTab({
                         placeholder="Enter premine amount"
                         id="premine"
                         type="number"
-                        className="w-[300px]"
                       />
                     </FormControl>
                     <FormMessage>
@@ -235,7 +233,6 @@ export default function EtchTab({
                         placeholder="Enter token amount"
                         id="amount"
                         type="number"
-                        className="w-[300px]"
                       />
                     </FormControl>
                     <FormMessage>
@@ -270,7 +267,6 @@ export default function EtchTab({
                         placeholder="Enter token cap"
                         id="cap"
                         type="number"
-                        className="w-[300px]"
                       />
                     </FormControl>
                     <FormMessage>
@@ -303,7 +299,6 @@ export default function EtchTab({
                         placeholder="Enter token divisibility"
                         id="divisibility"
                         type="number"
-                        className="w-[300px]"
                       />
                     </FormControl>
                     <FormMessage>
@@ -346,8 +341,12 @@ export default function EtchTab({
                 </FormItem>
               )}
             />
-            <CardFooter className="px-0">
-              <Button className="mt-5" type="submit">
+            <CardFooter className="px-0 relative z-0 justify-end">
+              <Button
+                className="mt-5 bg-white text-black"
+                type="submit"
+                variant={'outline'}
+              >
                 Etch Token
               </Button>
             </CardFooter>

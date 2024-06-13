@@ -7,7 +7,7 @@
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
 
-    --card: 240 10% 3.9%;
+    --card: 0, 0%, 7%;
     --card-foreground: 0 0% 98%;
 
     --popover: 240 10% 3.9%;
@@ -25,7 +25,7 @@
     --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0, 100%, 57%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 240 3.7% 15.9%;
@@ -33,6 +33,8 @@
     --ring: 240 4.9% 83.9%;
 
     --radius: 0.5rem;
+
+    --title: 154, 100%, 45%;
   }
 }
 
@@ -52,6 +54,12 @@
   100% {
     transform: rotate(360deg);
   }
+}
+@font-face {
+  font-family: 'Rootstock Sans Body';
+  src: url('assets/font/Rootstock-Sans-Body.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
 }
 
 .gradient {
@@ -77,9 +85,30 @@
 }
 
 body {
-  overflow-x: hidden;
+  font-family: 'Rootstock Sans Body', sans-serif;
 }
 
-* {
-  transition: all 0.5s ease-out;
+.btn-outline {
+  @apply relative w-[120px] h-[36px] border-[1px] rounded-full
+}
+
+.btn-outline::before {
+  @apply absolute w-[120px] h-[36px] top-[3px] left-[1px] z-[-1] border-[1px] border-white rounded-full;
+  content: "";
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(54, 54, 54);   
+  border-radius: 12px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgb(125, 125, 125);
+  border-radius: 20px;
+  border: 1px solid rgb(49, 49, 49);
 }
