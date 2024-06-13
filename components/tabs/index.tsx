@@ -45,9 +45,7 @@ export default function TabsSection() {
         </TabsTrigger>
       </TabsList>
       <TabsContent value="etch">
-        {etchedFinished ? (
-          <div>Etched Finished</div>
-        ) : !commitTxHash ? (
+        {!commitTxHash ? (
           <EtchTab
             setRuneProps={setRunePropsState}
             setCommitTxHash={setCommitTxHash}

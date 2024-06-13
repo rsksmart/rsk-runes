@@ -47,7 +47,6 @@ export default function EtchingProgress({
         //TODO show success message on the screen and execute factory contract
         setEtchedFinished(confirmed)
         console.log('is confirmed?', confirmed)
-
         if (confirmed) console.log('the rune has been etched')
       } else if (commitTxHash) {
         console.log('commitTxHash in updateStatus:', commitTxHash)
@@ -132,9 +131,11 @@ export default function EtchingProgress({
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="space-x-20 w-50">
         <CardTitle>{name}</CardTitle>
-        <CardDescription>Information about the rune: {name}.</CardDescription>
+        <CardDescription className="text-left w-100">
+          Information about the rune: {name}.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
@@ -148,16 +149,29 @@ export default function EtchingProgress({
           </div>
         </div>
         <div className="space-y-2">
-          <Label>Progress</Label>
+          <Label>Step 1. Etching Progress</Label>
           <Progress className="w-full" value={progress} />
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            The Last Etch token is a limited edition. The progress is currently
-            at {progress}%.
+            {revealTxHash
+              ? etchedFinished
+                ? 'Etching process has been confirmed successfully, proceeding with minting . . .'
+                : 'The Etching process has been completed, waiting for confirmation . . .'
+              : `The Etching progress is currently at ${progress > 100 ? 100 : progress}%.`}
           </p>
         </div>
+        {etchedFinished && (
+          <div className="space-y-2">
+            <Label>Step 2. Minting Rune in Rootstock network Progress</Label>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {"Creating your rune's token in the Rootstock network"}
+            </p>
+          </div>
+        )}
       </CardContent>
       <CardFooter>
-        <Button>Etching Rune ...</Button>
+        <Button>
+          {etchedFinished ? 'Minting tokens' : 'Etching Rune ...'}
+        </Button>
       </CardFooter>
     </Card>
   )
