@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
 import { address } from '../address'
 import runeFactory from '../abi/RuneFactory.json'
+import { toast } from 'react-toastify'
 
 const CONTRACT_ADDRESS = address.factory
 const ABI = runeFactory.abi
@@ -16,14 +17,14 @@ interface Params {
   _maxSupply: ethers.BigNumberish
 }
 
-interface UseRuneERC20Props {
-  name?: string
-  symbol?: string
-  initialSupply?: ethers.BigNumberish
-  initialOwner?: string
-  runeID?: string
-  _mintAmount?: ethers.BigNumberish
-  _maxSupply?: ethers.BigNumberish
+export interface UseRuneERC20Props {
+  name: string
+  symbol: string
+  initialSupply: ethers.BigNumberish
+  initialOwner: string
+  runeID: string
+  _mintAmount: ethers.BigNumberish
+  _maxSupply: ethers.BigNumberish
 }
 
 export const useRuneERC20 = ({
@@ -35,8 +36,6 @@ export const useRuneERC20 = ({
   _mintAmount,
   _maxSupply,
 }: UseRuneERC20Props) => {
-  const [provider, setProvider] = useState<ethers.JsonRpcProvider | null>(null)
-  const [wallet, setWallet] = useState<ethers.Wallet | null>(null)
   const [contract, setContract] = useState<ethers.Contract | null>(null)
   const [tokenAddress, setTokenAddress] = useState<string | null>(null)
   const [params, setParams] = useState<Params | null>(null)
@@ -49,17 +48,13 @@ export const useRuneERC20 = ({
   }, [])
 
   const connectToBlockchain = async () => {
-    console.log('Connecting to blockchain')
-    const PK =
-      process.env.REACT_APP_PK ||
-      '29b4170eb971bb80429774eb210b0096e14ec40908bf8dcb31ff49894149b1e8'
+    const PK = process.env.NEXT_PUBLIC_APP_PK
     const rpcProvider = new ethers.JsonRpcProvider(
-      process.env.REACT_APP_RPC_URL ||
-        'https://go.getblock.io/2d127e75326e46c8b6a3d1b83dc9d666'
+      process.env.NEXT_PUBLIC_RPC_URL
     )
 
     if (!rpcProvider || !PK) {
-      console.error('Could not connect to blockchain')
+      console.error('Not able to connect to blockchain')
       return
     }
     try {
@@ -70,12 +65,10 @@ export const useRuneERC20 = ({
         wallet
       )
 
-      setProvider(rpcProvider)
-      setWallet(wallet)
       setContract(contractInstance)
-      console.log('Connected to blockchain')
+      console.log('Rune Custom Hook Connected to RSK chain')
     } catch (error) {
-      console.log('Error loading signer:', error)
+      toast.error('Error loading signer on Rune hook')
     }
   }
 
