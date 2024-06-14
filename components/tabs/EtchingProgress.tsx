@@ -225,8 +225,11 @@ export default function EtchingProgress({
           </div>
         )}
       </CardContent>
-      <CardFooter>
-        <Button>
+      <CardFooter className="relative z-0 justify-end p-6">
+        <Button
+          variant={'outline'}
+          className="bg-white text-black before:w-[130px]"
+        >
           {etchedFinished ? 'Minting tokens on RSK' : 'Etching Rune ...'}
         </Button>
       </CardFooter>
