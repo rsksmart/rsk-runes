@@ -44,7 +44,7 @@ export default function TabsSection() {
           Mint
         </TabsTrigger>
       </TabsList>
-      <TabsContent value="etch" className='w-full'>
+      <TabsContent value="etch" className="w-full">
         {!commitTxHash ? (
           <EtchTab
             setRuneProps={setRunePropsState}
@@ -55,6 +55,7 @@ export default function TabsSection() {
             runeProps={runePropsState}
             commitTxHash={commitTxHash}
             setRevealTxHash={setRevealTxHash}
+            setCommitTxHash={setCommitTxHash}
             revealTxHash={revealTxHash}
             etchedFinished={etchedFinished}
             setEtchedFinished={setEtchedFinished}

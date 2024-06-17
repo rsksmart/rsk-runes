@@ -9,7 +9,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { useCallback, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useState } from 'react'
 import { formatAddress } from '@/lib/utils'
 import { FormData } from '@/app/utils/types'
 // @ts-ignore
@@ -22,7 +22,8 @@ import { ethers } from 'ethers'
 type Props = {
   runeProps: FormData
   commitTxHash: string | null
-  setRevealTxHash: (revealTxHash: string) => void
+  setRevealTxHash: (revealTxHash: string | null) => void
+  setCommitTxHash: (commitTxHash: string | null) => void
   revealTxHash: string | null
   etchedFinished: boolean
   setEtchedFinished: (etchedFinished: boolean) => void
@@ -34,10 +35,12 @@ export default function EtchingProgress({
   revealTxHash,
   etchedFinished,
   setEtchedFinished,
+  setCommitTxHash,
 }: Props): JSX.Element {
   const [commitConfirmations, setCommitConfirmations] = useState(0)
   const [progress, setProgress] = useState(0)
   const [etchedConfirmed, setEtchedConfirmed] = useState(false)
+  const [erc20AddressRequested, setErc20AddressRequested] = useState(false)
   const [newRuneProps, setNewRuneProps] = useState<UseRuneERC20Props>({
     name: '',
     symbol: '',
@@ -56,28 +59,52 @@ export default function EtchingProgress({
     createRune,
     loadingCreateRune,
     txStatus, //posible states are: 'pending', 'success', 'error'
-    createReceipt,
+    createdReceipt,
+    txHash,
   } = useRuneERC20(newRuneProps)
-  const { name, symbol, address: owner } = runeProps
+  const {
+    name,
+    symbol,
+    address: owner,
+    premine,
+    amount,
+    cap,
+    divisibility,
+  } = runeProps
 
   const executeMinting = useCallback(async () => {
     try {
       console.log('minting rune')
       if (updateStatusInterval) clearInterval(updateStatusInterval!)
-      if (!name || !symbol || !owner) return
+      if (!name || !symbol || !owner || !premine || !amount || !cap) return
       const newRuneProps: UseRuneERC20Props = {
         name: name,
         symbol: symbol,
-        initialSupply: ethers.parseUnits('0', 18),
+        initialSupply: ethers.parseUnits(premine.toString(), 18),
         initialOwner: owner,
-        runeID: '',
-        _mintAmount: ethers.parseUnits('0', 18),
-        _maxSupply: ethers.parseUnits('0', 18),
+        runeID: '1',
+        _mintAmount: ethers.parseUnits(amount.toString(), 18),
+        _maxSupply: ethers.parseUnits(cap.toString(), 18),
       }
+      setNewRuneProps(newRuneProps)
     } catch (error) {
       toast.error('Error minting the rune')
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+  useEffect(() => {
+    if (newRuneProps.name !== '' && (!erc20AddressRequested || !tokenAddress)) {
+      console.log('new token address inside wrong request is ', tokenAddress)
+      getTokenAddress()
+      console.log('getting token address')
+      setErc20AddressRequested(true)
+    }
+    if (tokenAddress && !loadingCreateRune) {
+      console.log('new token address is ', tokenAddress)
+      createRune()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newRuneProps, tokenAddress])
 
   const updateStatus = useCallback(async () => {
     try {
@@ -166,14 +193,38 @@ export default function EtchingProgress({
     }
   }, [commitConfirmations, executeRevealTxHash])
 
-  async function continueEtching() {
-    console.log('ON continue etching')
+  const goToUrl = (url: string) => {
+    window.open(url, '_blank')
   }
-  const goToUrl = () => {
-    window.open(
-      `${process.env.NEXT_PUBLIC_EXPLORER_URL}/${revealTxHash}`,
-      '_blank'
+  const newRune = () => {
+    const localData = JSON.parse(localStorage.getItem('runeData')!)
+    const newRuneCreated = {
+      ...localData,
+      tokenAddressRSK: tokenAddress,
+      txHashRSK: txHash,
+      txReceiptRSK: createdReceipt,
+    }
+    const prevRunes = JSON.parse(localStorage.getItem('runesHistory')!)
+    localStorage.setItem(
+      'runesHistory',
+      prevRunes
+        ? JSON.stringify([...prevRunes, newRuneCreated])
+        : JSON.stringify([newRuneCreated])
     )
+    localStorage.removeItem('runeData')
+    setCommitTxHash(null)
+    setRevealTxHash(null)
+    setEtchedFinished(false)
+    setErc20AddressRequested(false)
+    setNewRuneProps({
+      name: '',
+      symbol: '',
+      initialSupply: ethers.parseUnits('0', 18),
+      initialOwner: '',
+      runeID: '',
+      _mintAmount: ethers.parseUnits('0', 18),
+      _maxSupply: ethers.parseUnits('0', 18),
+    })
   }
   return (
     <Card>
@@ -207,14 +258,22 @@ export default function EtchingProgress({
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {' Check status of your TX on'}
           </p>
-          <p
-            className="text-sm text-blue-600 dark:text-gray-400 cursor-pointer"
-            onClick={goToUrl}
-          >
-            {`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${
-              revealTxHash ? `${revealTxHash}` : `${commitTxHash}`
-            }`}
-          </p>
+          {!etchedFinished && (
+            <p
+              className="text-sm text-blue-600 dark:text-gray-400 cursor-pointer"
+              onClick={() =>
+                goToUrl(
+                  `${process.env.NEXT_PUBLIC_EXPLORER_URL}/${
+                    revealTxHash ? `${revealTxHash}` : `${commitTxHash}`
+                  }`
+                )
+              }
+            >
+              {`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${
+                revealTxHash ? `${revealTxHash}` : `${commitTxHash}`
+              }`}
+            </p>
+          )}
         </div>
         {etchedFinished && (
           <div className="space-y-2">
@@ -222,16 +281,75 @@ export default function EtchingProgress({
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {"Creating your rune's token in the Rootstock network"}
             </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {`Minting status is --${txStatus ?? 'starting'}--`}
+            </p>
+            {txHash && txStatus !== 'success' && (
+              <Fragment>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {' Check status of your minting on RSK'}
+                </p>
+                <p
+                  className="text-sm text-blue-600 dark:text-gray-400 cursor-pointer"
+                  onClick={() =>
+                    goToUrl(
+                      `${process.env.NEXT_PUBLIC_RSK_EXPLORER_URL}/${txHash}`
+                    )
+                  }
+                >
+                  {`${process.env.NEXT_PUBLIC_RSK_EXPLORER_URL}/${txHash}`}
+                </p>
+              </Fragment>
+            )}
+            {txStatus === 'success' && createdReceipt && (
+              <Fragment>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {'Your rune has been minted successfully'}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {' Your new token address is'}
+                </p>
+                <p className="text-sm text-blue-600 dark:text-gray-400 cursor-pointer">
+                  {tokenAddress ?? "Couldn't get token address"}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {' Check TX of your minting on RSK'}
+                </p>
+                <p
+                  className="text-sm text-blue-600 dark:text-gray-400 cursor-pointer"
+                  onClick={() =>
+                    goToUrl(
+                      `${process.env.NEXT_PUBLIC_RSK_EXPLORER_URL}/${createdReceipt.hash}`
+                    )
+                  }
+                >
+                  {`${process.env.NEXT_PUBLIC_RSK_EXPLORER_URL}/${createdReceipt.hash}`}
+                </p>
+              </Fragment>
+            )}
           </div>
         )}
       </CardContent>
       <CardFooter className="relative z-0 justify-end p-6">
-        <Button
-          variant={'outline'}
-          className="bg-white text-black before:w-[130px]"
-        >
-          {etchedFinished ? 'Minting tokens on RSK' : 'Etching Rune ...'}
-        </Button>
+        {txStatus === 'success' && createdReceipt ? (
+          <Button
+            variant={'outline'}
+            className="mt-5 bg-white text-black"
+            type="submit"
+            onClick={newRune}
+          >
+            {'Create a new rune'}
+          </Button>
+        ) : (
+          <Button
+            variant={'outline'}
+            className="mt-5 bg-white text-black"
+            type="submit"
+            disabled={true}
+          >
+            {etchedFinished ? 'Minting tokens on RSK' : 'Etching Rune ...'}
+          </Button>
+        )}
       </CardFooter>
     </Card>
   )

@@ -352,7 +352,6 @@ export default function EtchTab({
                 variant={'outline'}
                 disabled={loading}
               >
-                Etch Token
                 {loading ? 'Loading' : 'Etch Token'}
               </Button>
             </CardFooter>

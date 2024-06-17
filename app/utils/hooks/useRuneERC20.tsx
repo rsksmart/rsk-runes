@@ -38,11 +38,12 @@ export const useRuneERC20 = ({
 }: UseRuneERC20Props) => {
   const [contract, setContract] = useState<ethers.Contract | null>(null)
   const [tokenAddress, setTokenAddress] = useState<string | null>(null)
+  const [txHash, setTxHash] = useState<string | null>(null)
   const [params, setParams] = useState<Params | null>(null)
   const [salt, setSalt] = useState<string | null>(null)
   const [txStatus, setTxStatus] = useState<string | null>(null)
   const [loadingCreateRune, setLoadingCreateRune] = useState<boolean>(false)
-  const [createReceipt, setCreateReceipt] = useState<any | null>(null)
+  const [createdReceipt, setCreatedReceipt] = useState<any | null>(null)
   useEffect(() => {
     connectToBlockchain()
   }, [])
@@ -77,18 +78,6 @@ export const useRuneERC20 = ({
 
     const salt = generateSalt()
     setSalt(salt)
-    console.log('Getting token address')
-    console.log(
-      'Params:',
-      name,
-      symbol,
-      initialSupply,
-      initialOwner,
-      salt,
-      _mintAmount,
-      _maxSupply
-    )
-
     try {
       const tokenAddress = await contract.getTokenAddress(
         name,
@@ -110,7 +99,7 @@ export const useRuneERC20 = ({
         _maxSupply: _maxSupply!,
       })
     } catch (error) {
-      console.error('Error getting token address:', error)
+      throw new Error('Error getting token address, please try again')
     }
   }
 
@@ -154,6 +143,7 @@ export const useRuneERC20 = ({
 
       console.log('Transaction sent:', transaction)
       console.log('Transaction hash:', transaction.hash)
+      setTxHash(transaction.hash)
 
       const receipt = await transaction.wait()
       console.log('Transaction confirmed:', receipt)
@@ -161,7 +151,7 @@ export const useRuneERC20 = ({
       if (receipt.status === 1) {
         console.log('Rune created successfully:', receipt)
         setTxStatus('success')
-        setCreateReceipt(receipt)
+        setCreatedReceipt(receipt)
       } else {
         console.error('Transaction failed:', receipt)
         setTxStatus('error')
@@ -188,6 +178,7 @@ export const useRuneERC20 = ({
     connectToBlockchain,
     loadingCreateRune,
     txStatus,
-    createReceipt,
+    createdReceipt,
+    txHash,
   }
 }
