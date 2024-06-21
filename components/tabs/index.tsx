@@ -3,6 +3,7 @@ import EtchTab from '@/components/tabs/EtchTab'
 import { useEffect, useState } from 'react'
 import EtchingProgress from './EtchingProgress'
 import { FormData } from '@/app/utils/types'
+import EtchRunesToRBTC from './EtchRunesToRBTC'
 
 export default function TabsSection() {
   const [runePropsState, setRunePropsState] = useState<FormData>({
@@ -38,12 +39,15 @@ export default function TabsSection() {
       className="w-full max-w-2xl flex flex-col items-center"
       defaultValue="etch"
     >
-      <TabsList className="grid grid-cols-2 w-fit mb-1">
+      {/* <TabsList className="grid grid-cols-3 w-fit mb-1">
         <TabsTrigger value="etch">Etch</TabsTrigger>
         <TabsTrigger disabled value="mint">
           Mint
         </TabsTrigger>
-      </TabsList>
+        <TabsTrigger disabled value="Runes to RBTC">
+          Runes to RBTC
+        </TabsTrigger>
+      </TabsList> */}
       <TabsContent value="etch" className="w-full">
         {!commitTxHash ? (
           <EtchTab
@@ -51,15 +55,16 @@ export default function TabsSection() {
             setCommitTxHash={setCommitTxHash}
           />
         ) : (
-          <EtchingProgress
-            runeProps={runePropsState}
-            commitTxHash={commitTxHash}
-            setRevealTxHash={setRevealTxHash}
-            setCommitTxHash={setCommitTxHash}
-            revealTxHash={revealTxHash}
-            etchedFinished={etchedFinished}
-            setEtchedFinished={setEtchedFinished}
-          />
+          <EtchRunesToRBTC />
+          // <EtchingProgress
+          //   runeProps={runePropsState}
+          //   commitTxHash={commitTxHash}
+          //   setRevealTxHash={setRevealTxHash}
+          //   setCommitTxHash={setCommitTxHash}
+          //   revealTxHash={revealTxHash}
+          //   etchedFinished={etchedFinished}
+          //   setEtchedFinished={setEtchedFinished}
+          // />
         )}
       </TabsContent>
       {/* <div>

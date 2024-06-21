@@ -1,4 +1,5 @@
 export interface FormData {
+  nft?: string
   name?: string
   symbol?: string
   premine?: number
