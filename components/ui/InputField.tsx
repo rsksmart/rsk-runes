@@ -20,7 +20,7 @@ function InputField({ form, tooltip, name, placeholder, type = 'text', disabled 
       render={({ field }) => (
         <FormItem>
           <FormLabel className="flex items-center gap-1">
-            <span className='capitalize'>{name}</span>
+            <span className={`capitalize ${disabled ? 'opacity-50' : ''}`}>{name}</span>
             <Tooltip>
               <TooltipTrigger>
                 <CircleHelp className="w-4 h-4" />

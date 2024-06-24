@@ -6,7 +6,7 @@ import TabsSection from '@/components/tabs';
 import Navbar from '@/components/navbar/Navbar';
 import Footer from '@/components/Footer';
 
-const Home = () => {
+const Home = ({ children }: { children: React.ReactNode }) => {
   const { isLoggedIn } = useAuth();
   const router = useRouter();
 
@@ -25,7 +25,8 @@ const Home = () => {
         <h1 className="bg-title text-4xl md:text-5xl font-bold mb-10 text-center text-black flex flex-col">
           <span className='max-w-max px-1.5'>Runes</span>
         </h1>
-        <TabsSection />
+        { children }
+        {/* <TabsSection /> */}
       </section>
       <Footer />
     </div>

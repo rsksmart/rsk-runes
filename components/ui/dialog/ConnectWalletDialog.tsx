@@ -19,7 +19,7 @@ function ConnectWalletDialog({ closeDialog, open }: props) {
     init();
     if (isLoggedIn) {
       authLogin(web3Provider!);
-      router.push('/home');
+      router.push('/runes');
       closeDialog();
       setIsError(false);
     }

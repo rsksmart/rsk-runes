@@ -1,22 +1,12 @@
 import React, { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
+import { useRouter } from 'next/navigation'
+import { useFetchRunes } from '@/app/utils/hooks/useFetchRunes'
 
-const RUNES = [
-  {
-    name: 'Runes 1',
-    symbol: 'ZB-1',
-  },
-  {
-    name: 'Runes 2',
-    symbol: 'ZB-2',
-  },
-  {
-    name: 'Runes 3',
-    symbol: 'ZB-3',
-  }
-]
 function RunesList() {
+  const { runes } = useFetchRunes();
+  const route = useRouter();
   return (
     <div className='my-10 w-full'>
       <Card>
@@ -25,7 +15,7 @@ function RunesList() {
         </CardHeader>
         <CardContent>
           {
-            RUNES.map((r) => (
+            runes?.map((r) => (
               <div className='flex justify-between items-center border border-input my-3 p-2 rounded-lg'>
                 <div>
                   <div className='text-gray-500'>Name</div>
@@ -36,8 +26,8 @@ function RunesList() {
                   <div className='text-sm'>{ r.symbol }</div>
                 </div>
                 <div className='flex gap-2'>
-                  <Button type='button' size={'sm'}>Sent to BTC</Button>
-                  <Button type='button' size={'sm'}>Mint</Button>
+                  <Button type='button' size={'sm'} onClick={() => route.push('/runes/runes-to-btc')}>Sent to BTC</Button>
+                  <Button type='button' size={'sm'} onClick={() => route.push('/runes/mint')}>Mint</Button>
                 </div>
               </div>
             ))

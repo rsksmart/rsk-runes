@@ -1,6 +1,7 @@
 'use client';
 import { ethers } from 'ethers';
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -15,6 +16,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const router = useRouter();
+  const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [address, setAddress] = useState<string>('');
   const [provider, setProvider] = useState<ethers.BrowserProvider | undefined>(undefined);
@@ -29,6 +32,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoggedIn(false);
     setAddress('');
   }, []);
+
+  useEffect(() => {
+    if (isLoggedIn && pathname === '/') {
+      router.push('/runes');
+    }
+  }, [pathname])
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, login, logout, provider, address, setAddress, setIsLoggedIn }}>
