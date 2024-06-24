@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import EtchingProgress from './EtchingProgress'
 import { FormData } from '@/app/utils/types'
 import EtchRunesToRBTC from './EtchRunesToRBTC'
+import RunesList from './RunesList'
 
 export default function TabsSection() {
   const [runePropsState, setRunePropsState] = useState<FormData>({
@@ -67,6 +68,7 @@ export default function TabsSection() {
           // />
         )}
       </TabsContent>
+      <RunesList />
       {/* <div>
         <h1>Runes</h1>
         <button onClick={getTokenAddress}>Get Token Address</button>

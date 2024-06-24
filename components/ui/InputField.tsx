@@ -10,8 +10,9 @@ type props = {
   type?: string
   placeholder: string
   tooltip: string
+  disabled?: boolean
 }
-function InputField({ form, tooltip, name, placeholder, type = 'text' }: props) {
+function InputField({ form, tooltip, name, placeholder, type = 'text', disabled = false }: props) {
   return (
     <FormField
       control={form.control}
@@ -37,6 +38,7 @@ function InputField({ form, tooltip, name, placeholder, type = 'text' }: props) 
               placeholder={placeholder}
               type={type}
               id={name}
+              disabled={disabled}
             />
           </FormControl>
           <FormMessage>

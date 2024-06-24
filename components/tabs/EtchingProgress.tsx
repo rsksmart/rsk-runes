@@ -333,7 +333,6 @@ export default function EtchingProgress({
       <CardFooter className="relative z-0 justify-end p-6">
         {txStatus === 'success' && createdReceipt ? (
           <Button
-            variant={'outline'}
             className="mt-5 bg-white text-black"
             type="submit"
             onClick={newRune}
@@ -342,7 +341,6 @@ export default function EtchingProgress({
           </Button>
         ) : (
           <Button
-            variant={'outline'}
             className="mt-5 bg-white text-black"
             type="submit"
             disabled={true}

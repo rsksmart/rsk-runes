@@ -44,7 +44,6 @@ export default function EtchTab({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nft: 'false',
       name: '',
       symbol: '',
       premine: 0,
@@ -54,6 +53,8 @@ export default function EtchTab({
       address: '',
     },
   })
+
+  const [isNft, setIsNft] = useState<boolean>(false);
 
   const onSubmit = (data: FormData) => {
     setRuneProps(data)
@@ -116,42 +117,30 @@ export default function EtchTab({
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="nft"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-1">
-                    NFT
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <CircleHelp className="w-4 h-4" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="max-w-[200px]">
-                          Name of the rune. e.g. &quot;UNCOMMON•GOODS&quot;
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </FormLabel>
-                  <FormControl>
-                    <CustomInput
-                      {...field}
-                      placeholder="Enter rune name"
-                      value={field.value!}
-                      onChange={field.onChange}
-                      id="nft"
-                    />
-                  </FormControl>
-                  <FormMessage>
-                    {form.formState.errors.name?.message}
-                  </FormMessage>
-                </FormItem>
-              )}
-            />
-            </div>
-            <div className="grid md:grid-cols-2 gap-4">
+            <FormItem>
+              <FormLabel className="flex items-center gap-1">
+                NFT
+                <Tooltip>
+                  <TooltipTrigger>
+                    <CircleHelp className="w-4 h-4" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="max-w-[200px]">
+                      NFT
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </FormLabel>
+              <FormControl>
+                <div className='flex gap-2'>
+                  <label className="flex relative items-center cursor-pointer">
+                    <input type='checkbox' className="sr-only" onChange={(e) => setIsNft(Boolean(e.target.checked))}/>
+                    <span className="w-11 h-6 bg-card rounded-full border border-input toggle-bg"></span>
+                  </label>
+                </div>
+              </FormControl>
+            </FormItem>
+            <div className="grid md:grid-cols-3 gap-4">
               <InputField
                 form={form}
                 name='name'
@@ -164,30 +153,31 @@ export default function EtchTab({
                 tooltip={`Symbol of the rune. e.g. "$"`}
                 placeholder='Enter token symbol'
               />
-            </div>
-            <div className="grid md:grid-cols-2 gap-4">
               <InputField
                 form={form}
                 name='premine'
                 tooltip='Premined runes to the rune etcher.'
                 placeholder='Enter premine amount'
                 type='number'
+                disabled={isNft}
               />
+            </div>
+            <div className="grid md:grid-cols-3 gap-4">
               <InputField
                 form={form}
                 name='amount'
                 tooltip='The amount of runes each mint produces.'
                 placeholder='Enter token amount'
                 type='number'
+                disabled={isNft}
               />
-            </div>
-            <div className="grid md:grid-cols-2 gap-4">
               <InputField
                 form={form}
                 name='cap'
                 tooltip='Total amount of mints.'
                 placeholder='Enter token cap'
                 type='number'
+                disabled={isNft}
               />
               <InputField
                 form={form}
@@ -195,6 +185,7 @@ export default function EtchTab({
                 tooltip='The number of subunits in a super unit of runes.'
                 placeholder='Enter token divisibility'
                 type='number'
+                disabled={isNft}
               />
             </div>
             <InputField

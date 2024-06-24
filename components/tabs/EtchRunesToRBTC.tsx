@@ -59,7 +59,7 @@ export default function EtchRunesToRBTC(): JSX.Element {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center gap-1">
-                      Name
+                      ID | Name
                       <Tooltip>
                         <TooltipTrigger>
                           <CircleHelp className="w-4 h-4" />
