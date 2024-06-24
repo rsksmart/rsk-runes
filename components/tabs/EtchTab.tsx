@@ -36,6 +36,7 @@ import {
   // @ts-ignore
 } from 'bc-runes-js'
 import InputField from '../ui/InputField'
+import { useRuneERC1155 } from '@/app/utils/hooks/useRuneERC1155'
 export default function EtchTab({
   setRuneProps,
   setCommitTxHash,
@@ -62,6 +63,19 @@ export default function EtchTab({
     handleEtch(data)
   }
 
+  const { getItemsByAddress, items, contract } = useRuneERC1155()
+  useEffect(() => {
+    //The items item is an array of runes information for the user
+    console.log('first rune name is ', items?.[0]?.name)
+  }, [items])
+  const fetchItems = async () => {
+    if (!contract) return
+    const fetchedItems = await getItemsByAddress(
+      '0xe1Fbf8A2661E1fdbe3D25b120b955dE1C67088CB'
+    )
+    //here by calling getItemsByAddress we are fetching the runes for the user, replace the address with the user's address
+    console.log('Fetched items:', fetchedItems)
+  }
   const handleEtch = async (data: FormData) => {
     try {
       setLoading(true)
@@ -107,7 +121,6 @@ export default function EtchTab({
       setLoading(false)
     }
   }
-
   return (
     <Card>
       <CardHeader>
@@ -206,6 +219,13 @@ export default function EtchTab({
             </CardFooter>
           </form>
         </Form>
+        <Button
+          className="mt-5 bg-white text-black"
+          variant={'outline'}
+          onClick={fetchItems}
+        >
+          {'fetch information'}
+        </Button>
       </CardContent>
     </Card>
   )
