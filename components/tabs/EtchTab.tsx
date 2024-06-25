@@ -72,9 +72,7 @@ export default function EtchTab({
   }, [contract])
   const fetchItems = async () => {
     if (!contract) return
-    const fetchedItems = await getItemsByAddress(
-      '0xe1Fbf8A2661E1fdbe3D25b120b955dE1C67088CB'
-    )
+    const fetchedItems = await getItemsByAddress();
     //here by calling getItemsByAddress we are fetching the runes for the user, replace the address with the user's address
     console.log('Fetched items:', fetchedItems)
   }

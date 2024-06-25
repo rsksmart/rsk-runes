@@ -5,6 +5,7 @@ import runeFactory from '../abi/RuneFactory.json'
 import rune1155 from '../abi/Rune1155.json'
 import { toast } from 'react-toastify'
 import { IRune } from '@/lib/types/RuneInfo'
+import { useAuth } from '@/app/context/AuthContext'
 
 const CONTRACT_ADDRESS = address.erc1155Token
 const ABI = rune1155.abi
@@ -13,28 +14,32 @@ export interface UseRuneERC1155Props {
 }
 export const useRuneERC1155 = () => {
   const [txHash, setTxHash] = useState<string | null>(null)
-  const [items, setItems] = useState<IRune[] | null>(null)
-  const [contract, setContract] = useState<ethers.Contract | null>(null)
+  const [items, setItems] = useState<IRune[] | null>([])
+  const [contract, setContract] = useState<ethers.Contract | null>(null);
+  const { provider, address: walletAddress } = useAuth();
+
 
   useEffect(() => {
     connectToBlockchain()
   }, [])
   const connectToBlockchain = async () => {
-    const PK = process.env.NEXT_PUBLIC_APP_PK
-    const rpcProvider = new ethers.JsonRpcProvider(
-      process.env.NEXT_PUBLIC_RPC_URL
-    )
+    // const PK = process.env.NEXT_PUBLIC_APP_PK
+    // const rpcProvider = new ethers.JsonRpcProvider(
+    //   process.env.NEXT_PUBLIC_RPC_URL
+    // )
 
-    if (!rpcProvider || !PK) {
-      console.error('Not able to connect to blockchain')
-      return
-    }
+    // if (!rpcProvider || !PK) {
+    //   console.error('Not able to connect to blockchain')
+    //   return
+    // }
     try {
-      const wallet = new ethers.Wallet(PK, rpcProvider)
+      const signer = await provider?.getSigner();
+      console.log('signer: ', signer);
+      // const wallet = new ethers.Wallet(PK, rpcProvider)
       const contractInstance = new ethers.Contract(
         CONTRACT_ADDRESS,
         ABI,
-        wallet
+        signer
       )
       setContract(contractInstance)
       console.log('Rune Custom Hook Connected to RSK chain')
@@ -51,12 +56,13 @@ export const useRuneERC1155 = () => {
     try {
     } catch (error) {}
   }
-  const getItemsByAddress = async (address: string) => {
+  const getItemsByAddress = async () => {
     try {
       console.log('contract is ', contract)
 
       if (!contract) return
-      const items = await contract.getUserTokens(address)
+      console.log('walletAddress: ', walletAddress);
+      const items = await contract.getUserTokens(walletAddress)
       console.log('items', items)
       console.log('items', items.length)
       if (items.length === 0) return null
@@ -77,7 +83,7 @@ export const useRuneERC1155 = () => {
         console.log('newItem', newItem)
         itemsArray.push(itemInfo)
       }
-      console.log('itemsArray', itemsArray)
+      console.log('itemsArray length', itemsArray.length)
       console.log('item 0 is', itemsArray[0])
       console.log('item 0 name is', itemsArray[0].name)
       setItems(itemsArray)
