@@ -17,8 +17,7 @@ export async function POST(request: NextRequest) {
   const data = await request.json()
   console.log('data in post request is ', data)
 
-  const PAYMENT_ADDRESS = process.env.NEXT_PUBLIC_PAYMENT_ADDRESS
-  const ORDINALS_ADDRESS = process.env.NEXT_PUBLIC_ORDINALS_ADDRESS
+  const TAPROOT_ADDRESS = process.env.NEXT_PUBLIC_TAPROOT_ADDRESS
   const WIF = process.env.NEXT_PUBLIC_WIF
 
   try {
@@ -43,8 +42,7 @@ export async function POST(request: NextRequest) {
     }))
 
     const initVariables = {
-      paymentAddress: process.env.NEXT_PUBLIC_PAYMENT_ADDRESS ?? '',
-      ordinalsAddress: process.env.NEXT_PUBLIC_ORDINALS_ADDRESS ?? '',
+      taprootAddress: process.env.NEXT_PUBLIC_TAPROOT_ADDRESS ?? '',
       wif: process.env.NEXT_PUBLIC_WIF ?? '',
       feePerByte: 350,
     }

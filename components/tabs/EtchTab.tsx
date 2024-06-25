@@ -31,11 +31,8 @@ import { EtchTabProps, FormData } from '@/app/utils/types'
 import { formSchema } from '@/app/utils/schemas'
 import { toast } from 'react-toastify'
 import { postRequest, getRequest } from '@/app/utils/apiRequests'
-import {
-  init,
-  // @ts-ignore
-} from 'bc-runes-js'
 import { useRuneERC1155 } from '@/app/utils/hooks/useRuneERC1155'
+
 export default function EtchTab({
   setRuneProps,
   setCommitTxHash,
@@ -53,6 +50,7 @@ export default function EtchTab({
       address: '',
     },
   })
+  const { getUserRunes, runes } = useRuneERC1155()
 
   const onSubmit = (data: FormData) => {
     setRuneProps(data)
@@ -60,18 +58,14 @@ export default function EtchTab({
     handleEtch(data)
   }
 
-  const { getItemsByAddress, items, contract } = useRuneERC1155()
   useEffect(() => {
-    //The items item is an array of runes information for the user
-    console.log('first rune name is ', items?.[0]?.name)
-  }, [items])
-  const fetchItems = async () => {
-    if (!contract) return
-    const fetchedItems = await getItemsByAddress(
-      '0xe1Fbf8A2661E1fdbe3D25b120b955dE1C67088CB'
-    )
-    //here by calling getItemsByAddress we are fetching the runes for the user, replace the address with the user's address
-    console.log('Fetched items:', fetchedItems)
+    //The runes is an array of runes information for the user
+    console.log('first rune name is ', runes?.[0]?.name)
+  }, [runes])
+  const fetchRunes = async () => {
+    const fetchedRunes = await getUserRunes()
+    //here by calling getUserRunes we are fetching the runes for the user connected with Metamask
+    console.log('Fetched runes:', fetchedRunes)
   }
   const handleEtch = async (data: FormData) => {
     try {
@@ -373,7 +367,7 @@ export default function EtchTab({
         <Button
           className="mt-5 bg-white text-black"
           variant={'outline'}
-          onClick={fetchItems}
+          onClick={fetchRunes}
         >
           {'fetch information'}
         </Button>

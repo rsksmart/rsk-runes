@@ -6,4 +6,5 @@ export interface Rune {
   currentSupply: number | string
   defaultMintAmount: number | string
   tokenId: string
+  userBalance: string
 }
