@@ -11,16 +11,13 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Fragment, useCallback, useEffect, useState } from 'react'
 import { formatAddress } from '@/lib/utils'
-import { FormData } from '@/app/utils/types'
-// @ts-ignore
 import { getConfirmations, isConfirmed } from 'bc-runes-js'
 import { toast } from 'react-toastify'
 import { postRequest } from '@/app/utils/apiRequests'
-import { UseRuneERC20Props, useRuneERC20 } from '@/app/utils/hooks/useRuneERC20'
-import { ethers } from 'ethers'
+import { UseRuneERC1155Props, useRuneERC1155 } from '@/app/utils/hooks/useRuneERC1155'
 
 type Props = {
-  runeProps: FormData
+  runeProps: UseRuneERC1155Props
   commitTxHash: string | null
   setRevealTxHash: (revealTxHash: string | null) => void
   setCommitTxHash: (commitTxHash: string | null) => void
@@ -40,71 +37,47 @@ export default function EtchingProgress({
   const [commitConfirmations, setCommitConfirmations] = useState(0)
   const [progress, setProgress] = useState(0)
   const [etchedConfirmed, setEtchedConfirmed] = useState(false)
-  const [erc20AddressRequested, setErc20AddressRequested] = useState(false)
-  const [newRuneProps, setNewRuneProps] = useState<UseRuneERC20Props>({
+  const [newRuneProps, setNewRuneProps] = useState<UseRuneERC1155Props>({
+    uri: '',
     name: '',
     symbol: '',
-    initialSupply: ethers.parseUnits('0', 18),
-    initialOwner: '',
-    runeID: '',
-    _mintAmount: ethers.parseUnits('0', 18),
-    _maxSupply: ethers.parseUnits('0', 18),
+    receiver: ''
   })
   const [updateStatusInterval, setUpdateStatusInterval] =
     useState<NodeJS.Timeout | null>(null)
   const commitConfirmationsThreshold = 6
   const {
-    tokenAddress,
-    getTokenAddress,
-    createRune,
-    loadingCreateRune,
-    txStatus, //posible states are: 'pending', 'success', 'error'
-    createdReceipt,
-    txHash,
-  } = useRuneERC20(newRuneProps)
+    mintNonFungible
+  } = useRuneERC1155()
+
   const {
+    uri,
     name,
     symbol,
-    address: owner,
-    premine,
-    amount,
-    cap,
-    divisibility,
+    receiver
   } = runeProps
 
   const executeMinting = useCallback(async () => {
     try {
       console.log('minting rune')
       if (updateStatusInterval) clearInterval(updateStatusInterval!)
-      if (!name || !symbol || !owner || !premine || !amount || !cap) return
-      const newRuneProps: UseRuneERC20Props = {
+      if (!name || !symbol || !uri || !receiver) return
+      const newRuneProps: UseRuneERC1155Props = {
+        uri,
+        receiver,
         name: name,
         symbol: symbol,
-        initialSupply: ethers.parseUnits(premine.toString(), 18),
-        initialOwner: owner,
-        runeID: '1',
-        _mintAmount: ethers.parseUnits(amount.toString(), 18),
-        _maxSupply: ethers.parseUnits(cap.toString(), 18),
       }
+
+      const mintTxHash = await mintNonFungible(newRuneProps)
+
+      toast.info(`Succesfully minted rune in tx ${mintTxHash}`)
       setNewRuneProps(newRuneProps)
     } catch (error) {
       toast.error('Error minting the rune')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  useEffect(() => {
-    if (newRuneProps.name !== '' && (!erc20AddressRequested || !tokenAddress)) {
-      console.log('new token address inside wrong request is ', tokenAddress)
-      getTokenAddress()
-      console.log('getting token address')
-      setErc20AddressRequested(true)
-    }
-    if (tokenAddress && !loadingCreateRune) {
-      console.log('new token address is ', tokenAddress)
-      createRune()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newRuneProps, tokenAddress])
 
   const updateStatus = useCallback(async () => {
     try {
@@ -196,36 +169,7 @@ export default function EtchingProgress({
   const goToUrl = (url: string) => {
     window.open(url, '_blank')
   }
-  const newRune = () => {
-    const localData = JSON.parse(localStorage.getItem('runeData')!)
-    const newRuneCreated = {
-      ...localData,
-      tokenAddressRSK: tokenAddress,
-      txHashRSK: txHash,
-      txReceiptRSK: createdReceipt,
-    }
-    const prevRunes = JSON.parse(localStorage.getItem('runesHistory')!)
-    localStorage.setItem(
-      'runesHistory',
-      prevRunes
-        ? JSON.stringify([...prevRunes, newRuneCreated])
-        : JSON.stringify([newRuneCreated])
-    )
-    localStorage.removeItem('runeData')
-    setCommitTxHash(null)
-    setRevealTxHash(null)
-    setEtchedFinished(false)
-    setErc20AddressRequested(false)
-    setNewRuneProps({
-      name: '',
-      symbol: '',
-      initialSupply: ethers.parseUnits('0', 18),
-      initialOwner: '',
-      runeID: '',
-      _mintAmount: ethers.parseUnits('0', 18),
-      _maxSupply: ethers.parseUnits('0', 18),
-    })
-  }
+
   return (
     <Card>
       <CardHeader className="space-x-20 w-50">
@@ -238,7 +182,7 @@ export default function EtchingProgress({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="name">From</Label>
-            <p className="text-lg font-medium">{formatAddress(owner!)}</p>
+            <p className="text-lg font-medium">{formatAddress(receiver!)}</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="symbol">Symbol</Label>
