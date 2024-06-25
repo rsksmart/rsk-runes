@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { TabsContent } from '@/components/ui/tabs'
 
 export default function MintTab(): JSX.Element {
   return (
@@ -43,8 +42,13 @@ export default function MintTab(): JSX.Element {
           </div>
         </section>
       </CardContent>
-      <CardFooter className="flex justify-end p-6">
-        <Button>Create Mint Token</Button>
+      <CardFooter className="flex justify-end p-6 relative z-0">
+        <Button
+          className='before:w-[152px] bg-white text-black'
+          variant={'outline'}
+        >
+          Create Mint Token
+        </Button>
       </CardFooter>
     </Card>
   )

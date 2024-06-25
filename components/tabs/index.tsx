@@ -1,10 +1,10 @@
-import { TabsTrigger, TabsList, Tabs, TabsContent } from '@/components/ui/tabs'
+'use client'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
 import EtchTab from '@/components/tabs/EtchTab'
 import { useEffect, useState } from 'react'
-import EtchingProgress from './EtchingProgress'
 import { FormData } from '@/app/utils/types'
-import EtchRunesToRBTC from './EtchRunesToRBTC'
-import RunesList from './RunesList'
+import RunesList from '@/components/tabs/RunesList'
+import EtchingProgress from '@/components/tabs/EtchingProgress'
 
 export default function TabsSection() {
   const [runePropsState, setRunePropsState] = useState<FormData>({
@@ -40,15 +40,6 @@ export default function TabsSection() {
       className="w-full max-w-2xl flex flex-col items-center"
       defaultValue="etch"
     >
-      {/* <TabsList className="grid grid-cols-3 w-fit mb-1">
-        <TabsTrigger value="etch">Etch</TabsTrigger>
-        <TabsTrigger disabled value="mint">
-          Mint
-        </TabsTrigger>
-        <TabsTrigger disabled value="Runes to RBTC">
-          Runes to RBTC
-        </TabsTrigger>
-      </TabsList> */}
       <TabsContent value="etch" className="w-full">
         {!commitTxHash ? (
           <EtchTab
@@ -56,25 +47,17 @@ export default function TabsSection() {
             setCommitTxHash={setCommitTxHash}
           />
         ) : (
-          <EtchRunesToRBTC />
-          // <EtchingProgress
-          //   runeProps={runePropsState}
-          //   commitTxHash={commitTxHash}
-          //   setRevealTxHash={setRevealTxHash}
-          //   setCommitTxHash={setCommitTxHash}
-          //   revealTxHash={revealTxHash}
-          //   etchedFinished={etchedFinished}
-          //   setEtchedFinished={setEtchedFinished}
-          // />
+          <EtchingProgress
+            runeProps={runePropsState}
+            commitTxHash={commitTxHash}
+            setRevealTxHash={setRevealTxHash}
+            setCommitTxHash={setCommitTxHash}
+            revealTxHash={revealTxHash}
+            etchedFinished={etchedFinished}
+            setEtchedFinished={setEtchedFinished}
+          />
         )}
       </TabsContent>
-      <RunesList />
-      {/* <div>
-        <h1>Runes</h1>
-        <button onClick={getTokenAddress}>Get Token Address</button>
-        <button onClick={createRune}>Create Rune</button>
-        {tokenAddress && <p>Token Address: {tokenAddress}</p>}
-      </div> */}
     </Tabs>
   )
 }

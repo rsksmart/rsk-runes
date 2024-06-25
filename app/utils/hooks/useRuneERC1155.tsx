@@ -4,7 +4,7 @@ import { address } from '../address'
 import runeFactory from '../abi/RuneFactory.json'
 import rune1155 from '../abi/Rune1155.json'
 import { toast } from 'react-toastify'
-import { Rune } from '@/lib/types/RuneInfo'
+import { IRune } from '@/lib/types/RuneInfo'
 
 const CONTRACT_ADDRESS = address.erc1155Token
 const ABI = rune1155.abi
@@ -13,7 +13,7 @@ export interface UseRuneERC1155Props {
 }
 export const useRuneERC1155 = () => {
   const [txHash, setTxHash] = useState<string | null>(null)
-  const [items, setItems] = useState<Rune[] | null>(null)
+  const [items, setItems] = useState<IRune[] | null>(null)
   const [contract, setContract] = useState<ethers.Contract | null>(null)
 
   useEffect(() => {
@@ -61,11 +61,11 @@ export const useRuneERC1155 = () => {
       console.log('items', items.length)
       if (items.length === 0) return null
       console.log('item 0', items[0]?.toString() ?? 'no items')
-      let itemsArray: Rune[] = []
+      let itemsArray: IRune[] = []
       for (const item of items) {
         const itemInfo = await contract.getTokenInfo(item)
         console.log('itemInfo', itemInfo)
-        const newItem: Rune = {
+        const newItem: IRune = {
           uri: itemInfo[0],
           name: itemInfo[1],
           symbol: itemInfo[2],

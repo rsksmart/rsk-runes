@@ -11,7 +11,6 @@ const Home = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
-    console.log('isLoggedIn: ', isLoggedIn);
     if (!isLoggedIn) {
       router.push('/');
     }
@@ -26,7 +25,6 @@ const Home = ({ children }: { children: React.ReactNode }) => {
           <span className='max-w-max px-1.5'>Runes</span>
         </h1>
         { children }
-        {/* <TabsSection /> */}
       </section>
       <Footer />
     </div>
