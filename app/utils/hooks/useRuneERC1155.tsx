@@ -16,30 +16,27 @@ export const useRuneERC1155 = () => {
   const [txHash, setTxHash] = useState<string | null>(null)
   const [items, setItems] = useState<IRune[] | null>([])
   const [contract, setContract] = useState<ethers.Contract | null>(null);
-  const { provider, address: walletAddress } = useAuth();
-
+  const { address: walletAddress } = useAuth();
 
   useEffect(() => {
     connectToBlockchain()
   }, [])
   const connectToBlockchain = async () => {
-    // const PK = process.env.NEXT_PUBLIC_APP_PK
-    // const rpcProvider = new ethers.JsonRpcProvider(
-    //   process.env.NEXT_PUBLIC_RPC_URL
-    // )
+    const PK = process.env.NEXT_PUBLIC_APP_PK
+    const rpcProvider = new ethers.JsonRpcProvider(
+      process.env.NEXT_PUBLIC_RPC_URL
+    )
 
-    // if (!rpcProvider || !PK) {
-    //   console.error('Not able to connect to blockchain')
-    //   return
-    // }
+    if (!rpcProvider || !PK) {
+      console.error('Not able to connect to blockchain')
+      return
+    }
     try {
-      const signer = await provider?.getSigner();
-      console.log('signer: ', signer);
-      // const wallet = new ethers.Wallet(PK, rpcProvider)
+      const wallet = new ethers.Wallet(PK, rpcProvider)
       const contractInstance = new ethers.Contract(
         CONTRACT_ADDRESS,
         ABI,
-        signer
+        wallet
       )
       setContract(contractInstance)
       console.log('Rune Custom Hook Connected to RSK chain')

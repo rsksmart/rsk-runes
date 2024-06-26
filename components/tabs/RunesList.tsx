@@ -18,8 +18,8 @@ function RunesList({ items }: { items:IRune[] }) {
                 No runes
               </div>
             :
-            items?.map((r) => (
-              <div key={r.tokenId} className='flex justify-between items-center border border-input my-3 p-2 h-16 rounded-lg'>
+            items?.map((r, i) => (
+              <div key={i} className='flex justify-between items-center border border-input my-3 p-2 h-16 rounded-lg'>
                 <div className='flex flex-col justify-start items-start h-full'>
                   <div className='text-gray-500'>Name</div>
                   <div className='text-sm'>{ r.name }</div>
