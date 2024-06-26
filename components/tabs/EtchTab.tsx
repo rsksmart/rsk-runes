@@ -32,7 +32,7 @@ import { formSchema } from '@/app/utils/schemas'
 import { toast } from 'react-toastify'
 import { postRequest, getRequest } from '@/app/utils/apiRequests'
 import InputField from '../ui/InputField'
-import { useRuneERC1155 } from '@/app/utils/hooks/useRuneERC1155'
+import { UseRuneERC1155Props, useRuneERC1155 } from '@/app/utils/hooks/useRuneERC1155'
 import RunesList from './RunesList'
 
 export default function EtchTab({
@@ -40,7 +40,7 @@ export default function EtchTab({
   setCommitTxHash,
 }: EtchTabProps): JSX.Element {
   const [loading, setLoading] = useState(false)
-  const form = useForm<FormData>({
+  const form = useForm<UseRuneERC1155Props>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
@@ -49,14 +49,14 @@ export default function EtchTab({
       amount: 0,
       cap: 0,
       divisibility: 0,
-      address: '',
+      receiver: '',
     },
   })
   const { getUserRunes, runes, contract } = useRuneERC1155()
 
   const [isNft, setIsNft] = useState<boolean>(false);
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = (data: UseRuneERC1155Props) => {
     setRuneProps(data)
     localStorage.setItem('runeData', JSON.stringify({ runeProps: data }))
     handleEtch(data)

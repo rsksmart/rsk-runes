@@ -13,12 +13,16 @@ export interface UseRuneERC1155Props {
   name: string
   symbol: string
   receiver: string
+  premine?: number
+  amount?: number
+  cap?: number
+  divisibility?: number
 }
 
 export const useRuneERC1155 = () => {
   const [txHash, setTxHash] = useState<string | null>(null)
   const [contract, setContract] = useState<ethers.Contract | null>(null);
-  const [runes, setRunes] = useState<IRune[] | null>(null)
+  const [runes, setRunes] = useState<IRune[] | null>([])
   const { address: walletAddress } = useAuth();
 
   useEffect(() => {
