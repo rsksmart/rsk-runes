@@ -32,7 +32,10 @@ import { formSchema } from '@/app/utils/schemas'
 import { toast } from 'react-toastify'
 import { postRequest, getRequest } from '@/app/utils/apiRequests'
 import InputField from '../ui/InputField'
-import { UseRuneERC1155Props, useRuneERC1155 } from '@/app/utils/hooks/useRuneERC1155'
+import {
+  UseRuneERC1155Props,
+  useRuneERC1155,
+} from '@/app/utils/hooks/useRuneERC1155'
 import RunesList from './RunesList'
 
 export default function EtchTab({
@@ -54,7 +57,7 @@ export default function EtchTab({
   })
   const { getUserRunes, runes, contract } = useRuneERC1155()
 
-  const [isNft, setIsNft] = useState<boolean>(false);
+  const [isNft, setIsNft] = useState<boolean>(false)
 
   const onSubmit = (data: UseRuneERC1155Props) => {
     setRuneProps(data)
@@ -66,8 +69,8 @@ export default function EtchTab({
     //The runes is an array of runes information for the user
     console.log('first rune name is ', runes?.[0]?.name)
     fetchRunes()
-  }, [contract]);
-  
+  }, [contract])
+
   const fetchRunes = async () => {
     const fetchedRunes = await getUserRunes()
     //here by calling getUserRunes we are fetching the runes for the user connected with Metamask
@@ -136,16 +139,18 @@ export default function EtchTab({
                       <CircleHelp className="w-4 h-4" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="max-w-[200px]">
-                        NFT
-                      </p>
+                      <p className="max-w-[200px]">NFT</p>
                     </TooltipContent>
                   </Tooltip>
                 </FormLabel>
                 <FormControl>
-                  <div className='flex gap-2'>
+                  <div className="flex gap-2">
                     <label className="flex relative items-center cursor-pointer">
-                      <input type='checkbox' className="sr-only" onChange={(e) => setIsNft(Boolean(e.target.checked))}/>
+                      <input
+                        type="checkbox"
+                        className="sr-only"
+                        onChange={(e) => setIsNft(Boolean(e.target.checked))}
+                      />
                       <span className="w-11 h-6 bg-card rounded-full border border-input toggle-bg"></span>
                     </label>
                   </div>
@@ -154,56 +159,56 @@ export default function EtchTab({
               <div className="grid md:grid-cols-3 gap-4">
                 <InputField
                   form={form}
-                  name='name'
+                  name="name"
                   tooltip={`Name of the rune. e.g. "$"`}
-                  placeholder='Enter rune name'
+                  placeholder="Enter rune name"
                 />
                 <InputField
                   form={form}
-                  name='symbol'
+                  name="symbol"
                   tooltip={`Symbol of the rune. e.g. "$"`}
-                  placeholder='Enter token symbol'
+                  placeholder="Enter token symbol"
                 />
                 <InputField
                   form={form}
-                  name='premine'
-                  tooltip='Premined runes to the rune etcher.'
-                  placeholder='Enter premine amount'
-                  type='number'
+                  name="premine"
+                  tooltip="Premined runes to the rune etcher."
+                  placeholder="Enter premine amount"
+                  type="number"
                   disabled={isNft}
                 />
               </div>
               <div className="grid md:grid-cols-3 gap-4">
                 <InputField
                   form={form}
-                  name='amount'
-                  tooltip='The amount of runes each mint produces.'
-                  placeholder='Enter token amount'
-                  type='number'
+                  name="amount"
+                  tooltip="The amount of runes each mint produces."
+                  placeholder="Enter token amount"
+                  type="number"
                   disabled={isNft}
                 />
                 <InputField
                   form={form}
-                  name='cap'
-                  tooltip='Total amount of mints.'
-                  placeholder='Enter token cap'
-                  type='number'
+                  name="cap"
+                  tooltip="Total amount of mints."
+                  placeholder="Enter token cap"
+                  type="number"
                   disabled={isNft}
                 />
                 <InputField
                   form={form}
-                  name='divisibility'
-                  tooltip='The number of subunits in a super unit of runes.'
-                  placeholder='Enter token divisibility'
-                  type='number'
+                  name="divisibility"
+                  tooltip="The number of subunits in a super unit of runes."
+                  placeholder="Enter token divisibility"
+                  type="number"
                   disabled={isNft}
                 />
               </div>
               <InputField
                 form={form}
-                name='address'
-                tooltip='Enter the Rootstock address where runes will be minted into ERC20s'
-                placeholder='RSK address'
+                name="address"
+                tooltip="Enter the Rootstock address where runes will be minted into ERC20s"
+                placeholder="RSK address"
               />
               <CardFooter className="px-0 relative z-0 justify-end">
                 <Button
@@ -219,9 +224,7 @@ export default function EtchTab({
           </Form>
         </CardContent>
       </Card>
-      <RunesList
-        items={runes!}
-      />
+      <RunesList items={runes!} />
     </>
   )
 }

@@ -21,9 +21,9 @@ export interface UseRuneERC1155Props {
 
 export const useRuneERC1155 = () => {
   const [txHash, setTxHash] = useState<string | null>(null)
-  const [contract, setContract] = useState<ethers.Contract | null>(null);
+  const [contract, setContract] = useState<ethers.Contract | null>(null)
   const [runes, setRunes] = useState<IRune[] | null>([])
-  const { address: walletAddress } = useAuth();
+  const { address: walletAddress } = useAuth()
 
   useEffect(() => {
     connectToBlockchain()
@@ -62,14 +62,14 @@ export const useRuneERC1155 = () => {
 
   const mintNonFungible = async (runeData: UseRuneERC1155Props) => {
     try {
-      const {
-        uri,
+      const { uri, name, symbol, receiver } = runeData
+
+      const txResponse = await contract!.mintNonFungible(
+        `${uri} TODO: retrieve and save metadata`,
         name,
         symbol,
         receiver
-      } = runeData
-
-      const txResponse = await contract!.mintNonFungible(`${uri} TODO: retrieve and save metadata`, name, symbol, receiver)
+      )
       const { hash } = await txResponse.wait()
 
       return hash
@@ -83,7 +83,7 @@ export const useRuneERC1155 = () => {
       console.log('contract is ', contract)
 
       if (!contract) return
-      console.log('walletAddress: ', walletAddress);
+      console.log('walletAddress: ', walletAddress)
       const items = await contract.getUserTokens(walletAddress)
       console.log('items', items)
       console.log('items', items.length)
@@ -91,7 +91,7 @@ export const useRuneERC1155 = () => {
       console.log('item 0', items[0]?.toString() ?? 'no items')
       let runes: IRune[] = []
       for (const item of items) {
-        console.log('item: ', item);
+        console.log('item: ', item)
         const runeInfo = await contract.getTokenInfo(item, walletAddress)
         console.log('itemInfo', runeInfo)
         const newItem: IRune = {
@@ -121,6 +121,6 @@ export const useRuneERC1155 = () => {
     mintNonFungible,
     getUserRunes,
     runes,
-    contract
+    contract,
   }
 }
