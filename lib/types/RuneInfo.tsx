@@ -6,4 +6,5 @@ export interface IRune {
   currentSupply: number | string
   defaultMintAmount: number | string
   tokenId: string
+  userBalance: string
 }

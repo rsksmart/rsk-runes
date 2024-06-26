@@ -23,7 +23,7 @@
     "@rsksmart/rlogin-trezor-provider": "^1.0.4",
     "@rsksmart/rlogin-walletconnect2-provider": "^1.0.1",
     "axios": "^1.7.2",
-    "bc-runes-js": "^0.2.1",
+    "bc-runes-js": "^0.3.0",
     "bitcoinjs-lib": "^6.1.5",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",

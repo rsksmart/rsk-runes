@@ -6,6 +6,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract RuneToken is ERC1155, Ownable {
+    struct Balance {
+      address account;
+      uint256 balance;
+    }
+  
     struct TokenInfo {
         string uri;
         string name;
@@ -13,6 +18,7 @@ contract RuneToken is ERC1155, Ownable {
         uint256 maxSupply;
         uint256 currentSupply;
         uint256 defaultMintAmount;
+        Balance balance;
     }
 
     mapping(uint256 => TokenInfo) private _tokenInfos;
@@ -59,7 +65,8 @@ contract RuneToken is ERC1155, Ownable {
             symbol: symbol,
             maxSupply: maxSupply,
             currentSupply: initialSupply,
-            defaultMintAmount: defaultMintAmount
+            defaultMintAmount: defaultMintAmount,
+            balance: Balance(address(0), 0)
         });
 
         _mint(receiver, tokenId, initialSupply, "");
@@ -88,7 +95,8 @@ contract RuneToken is ERC1155, Ownable {
             symbol: symbol,
             maxSupply: 1,
             currentSupply: 1,
-            defaultMintAmount: 1
+            defaultMintAmount: 1,
+            balance: Balance(address(0), 0)
         });
 
         _mint(receiver, tokenId, 1, "");
@@ -132,10 +140,18 @@ contract RuneToken is ERC1155, Ownable {
      * @return TokenInfo struct containing the token's information
      */
     function getTokenInfo(
-        uint256 tokenId
+        uint256 tokenId,
+        address holder
     ) public view returns (TokenInfo memory) {
-        require(_tokenInfos[tokenId].maxSupply > 0, "Token ID does not exist");
-        return _tokenInfos[tokenId];
+        TokenInfo memory tokenInfo = _tokenInfos[tokenId];
+        require(tokenInfo.maxSupply > 0, "Token ID does not exist");
+
+        if (holder != address(0)) {
+          uint256 userBalance = this.balanceOf(holder, tokenId);
+          tokenInfo.balance = Balance(holder, userBalance);
+        }
+
+        return tokenInfo;
     }
 
     /**

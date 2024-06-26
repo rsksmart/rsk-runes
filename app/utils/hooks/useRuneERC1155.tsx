@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
-import { ethers } from 'ethers'
+import { ethers, BigNumberish } from 'ethers'
 import { address } from '../address'
-import runeFactory from '../abi/RuneFactory.json'
 import rune1155 from '../abi/Rune1155.json'
 import { toast } from 'react-toastify'
 import { IRune } from '@/lib/types/RuneInfo'
@@ -10,12 +9,16 @@ import { useAuth } from '@/app/context/AuthContext'
 const CONTRACT_ADDRESS = address.erc1155Token
 const ABI = rune1155.abi
 export interface UseRuneERC1155Props {
+  uri: string
   name: string
+  symbol: string
+  receiver: string
 }
+
 export const useRuneERC1155 = () => {
   const [txHash, setTxHash] = useState<string | null>(null)
-  const [items, setItems] = useState<IRune[] | null>([])
   const [contract, setContract] = useState<ethers.Contract | null>(null);
+  const [runes, setRunes] = useState<IRune[] | null>(null)
   const { address: walletAddress } = useAuth();
 
   useEffect(() => {
@@ -38,6 +41,14 @@ export const useRuneERC1155 = () => {
         ABI,
         wallet
       )
+
+      if (!contractInstance) {
+        throw new Error('There was a problem retrieving RuneToken contract.')
+      } else if (!wallet) {
+        throw new Error('There was a problem connecting with Metamask.')
+      }
+
+      //replace for useAuth wallet address
       setContract(contractInstance)
       console.log('Rune Custom Hook Connected to RSK chain')
     } catch (error) {
@@ -45,15 +56,25 @@ export const useRuneERC1155 = () => {
     }
   }
 
-  const onMintFungible = async () => {
+  const mintNonFungible = async (runeData: UseRuneERC1155Props) => {
     try {
-    } catch (error) {}
+      const {
+        uri,
+        name,
+        symbol,
+        receiver
+      } = runeData
+
+      const txResponse = await contract!.mintNonFungible(`${uri} TODO: retrieve and save metadata`, name, symbol, receiver)
+      const { hash } = await txResponse.wait()
+
+      return hash
+    } catch (error) {
+      console.log({ error })
+    }
   }
-  const onMintNonFungible = async () => {
-    try {
-    } catch (error) {}
-  }
-  const getItemsByAddress = async () => {
+
+  const getUserRunes = async () => {
     try {
       console.log('contract is ', contract)
 
@@ -64,36 +85,38 @@ export const useRuneERC1155 = () => {
       console.log('items', items.length)
       if (items.length === 0) return null
       console.log('item 0', items[0]?.toString() ?? 'no items')
-      let itemsArray: IRune[] = []
+      let runes: IRune[] = []
       for (const item of items) {
-        const itemInfo = await contract.getTokenInfo(item)
-        console.log('itemInfo', itemInfo)
+        console.log('item: ', item);
+        const runeInfo = await contract.getTokenInfo(item, walletAddress)
+        console.log('itemInfo', runeInfo)
         const newItem: IRune = {
-          uri: itemInfo[0],
-          name: itemInfo[1],
-          symbol: itemInfo[2],
-          maxSupply: itemInfo[3].toString(),
-          currentSupply: itemInfo[4].toString(),
-          defaultMintAmount: itemInfo[5].toString(),
+          uri: runeInfo[0],
+          name: runeInfo[1],
+          symbol: runeInfo[2],
+          maxSupply: runeInfo[3].toString(),
+          currentSupply: runeInfo[4].toString(),
+          defaultMintAmount: runeInfo[5].toString(),
+          userBalance: runeInfo[6].toString(),
           tokenId: item.toString(),
         }
         console.log('newItem', newItem)
-        itemsArray.push(itemInfo)
+        runes.push(runeInfo)
       }
-      console.log('itemsArray length', itemsArray.length)
-      console.log('item 0 is', itemsArray[0])
-      console.log('item 0 name is', itemsArray[0].name)
-      setItems(itemsArray)
+      console.log('itemsArray', runes)
+      console.log('item 0 is', runes[0])
+      console.log('item 0 name is', runes[0].name)
+      setRunes(runes)
     } catch (error) {
+      console.log('error: ', error)
       console.error('error on fetching ', error)
     }
   }
   return {
     txHash,
-    onMintFungible,
-    onMintNonFungible,
-    getItemsByAddress,
-    items,
-    contract,
+    mintNonFungible,
+    getUserRunes,
+    runes,
+    contract
   }
 }
