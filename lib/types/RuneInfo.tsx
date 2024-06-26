@@ -1,4 +1,4 @@
-export interface Rune {
+export interface IRune {
   uri: string
   name: string
   symbol: string

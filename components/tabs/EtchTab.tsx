@@ -31,14 +31,16 @@ import { EtchTabProps, FormData } from '@/app/utils/types'
 import { formSchema } from '@/app/utils/schemas'
 import { toast } from 'react-toastify'
 import { postRequest, getRequest } from '@/app/utils/apiRequests'
-import { useRuneERC1155 } from '@/app/utils/hooks/useRuneERC1155'
+import InputField from '../ui/InputField'
+import { UseRuneERC1155Props, useRuneERC1155 } from '@/app/utils/hooks/useRuneERC1155'
+import RunesList from './RunesList'
 
 export default function EtchTab({
   setRuneProps,
   setCommitTxHash,
 }: EtchTabProps): JSX.Element {
   const [loading, setLoading] = useState(false)
-  const form = useForm<FormData>({
+  const form = useForm<UseRuneERC1155Props>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
@@ -47,12 +49,14 @@ export default function EtchTab({
       amount: 0,
       cap: 0,
       divisibility: 0,
-      address: '',
+      receiver: '',
     },
   })
-  const { getUserRunes, runes } = useRuneERC1155()
+  const { getUserRunes, runes, contract } = useRuneERC1155()
 
-  const onSubmit = (data: FormData) => {
+  const [isNft, setIsNft] = useState<boolean>(false);
+
+  const onSubmit = (data: UseRuneERC1155Props) => {
     setRuneProps(data)
     localStorage.setItem('runeData', JSON.stringify({ runeProps: data }))
     handleEtch(data)
@@ -61,7 +65,9 @@ export default function EtchTab({
   useEffect(() => {
     //The runes is an array of runes information for the user
     console.log('first rune name is ', runes?.[0]?.name)
-  }, [runes])
+    fetchRunes()
+  }, [contract]);
+  
   const fetchRunes = async () => {
     const fetchedRunes = await getUserRunes()
     //here by calling getUserRunes we are fetching the runes for the user connected with Metamask
@@ -113,265 +119,109 @@ export default function EtchTab({
     }
   }
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Etch</CardTitle>
-        <CardDescription>Etch a new rune.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-1">
-                      Name
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <CircleHelp className="w-4 h-4" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-[200px]">
-                            Name of the rune. e.g. &quot;UNCOMMON•GOODS&quot;
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </FormLabel>
-                    <FormControl>
-                      <CustomInput
-                        {...field}
-                        placeholder="Enter rune name"
-                        value={field.value}
-                        onChange={field.onChange}
-                        id="name"
-                      />
-                    </FormControl>
-                    <FormMessage>
-                      {form.formState.errors.name?.message}
-                    </FormMessage>
-                  </FormItem>
-                )}
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Etch</CardTitle>
+          <CardDescription>Etch a new rune.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <FormItem>
+                <FormLabel className="flex items-center gap-1">
+                  NFT
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <CircleHelp className="w-4 h-4" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-[200px]">
+                        NFT
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </FormLabel>
+                <FormControl>
+                  <div className='flex gap-2'>
+                    <label className="flex relative items-center cursor-pointer">
+                      <input type='checkbox' className="sr-only" onChange={(e) => setIsNft(Boolean(e.target.checked))}/>
+                      <span className="w-11 h-6 bg-card rounded-full border border-input toggle-bg"></span>
+                    </label>
+                  </div>
+                </FormControl>
+              </FormItem>
+              <div className="grid md:grid-cols-3 gap-4">
+                <InputField
+                  form={form}
+                  name='name'
+                  tooltip={`Name of the rune. e.g. "$"`}
+                  placeholder='Enter rune name'
+                />
+                <InputField
+                  form={form}
+                  name='symbol'
+                  tooltip={`Symbol of the rune. e.g. "$"`}
+                  placeholder='Enter token symbol'
+                />
+                <InputField
+                  form={form}
+                  name='premine'
+                  tooltip='Premined runes to the rune etcher.'
+                  placeholder='Enter premine amount'
+                  type='number'
+                  disabled={isNft}
+                />
+              </div>
+              <div className="grid md:grid-cols-3 gap-4">
+                <InputField
+                  form={form}
+                  name='amount'
+                  tooltip='The amount of runes each mint produces.'
+                  placeholder='Enter token amount'
+                  type='number'
+                  disabled={isNft}
+                />
+                <InputField
+                  form={form}
+                  name='cap'
+                  tooltip='Total amount of mints.'
+                  placeholder='Enter token cap'
+                  type='number'
+                  disabled={isNft}
+                />
+                <InputField
+                  form={form}
+                  name='divisibility'
+                  tooltip='The number of subunits in a super unit of runes.'
+                  placeholder='Enter token divisibility'
+                  type='number'
+                  disabled={isNft}
+                />
+              </div>
+              <InputField
+                form={form}
+                name='address'
+                tooltip='Enter the Rootstock address where runes will be minted into ERC20s'
+                placeholder='RSK address'
               />
-              <FormField
-                control={form.control}
-                name="symbol"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-1">
-                      Symbol
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <CircleHelp className="w-4 h-4" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-[200px]">
-                            Symbol of the rune. e.g. &quot;$&quot;
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="Enter token symbol"
-                        id="symbol"
-                      />
-                    </FormControl>
-                    <FormMessage>
-                      {form.formState.errors.symbol?.message}
-                    </FormMessage>
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="premine"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-1">
-                      Premine
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <CircleHelp className="w-4 h-4" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-[200px]">
-                            Premined runes to the rune etcher.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="Enter premine amount"
-                        id="premine"
-                        type="number"
-                      />
-                    </FormControl>
-                    <FormMessage>
-                      {form.formState.errors.premine?.message}
-                    </FormMessage>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-1">
-                      Amount
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <CircleHelp className="w-4 h-4" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-[200px]">
-                            The amount of runes each mint produces.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="Enter token amount"
-                        id="amount"
-                        type="number"
-                      />
-                    </FormControl>
-                    <FormMessage>
-                      {form.formState.errors.amount?.message}
-                    </FormMessage>
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="cap"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-1">
-                      Cap
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <CircleHelp className="w-4 h-4" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-[200px]">
-                            Total amount of mints.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="Enter token cap"
-                        id="cap"
-                        type="number"
-                      />
-                    </FormControl>
-                    <FormMessage>
-                      {form.formState.errors.cap?.message}
-                    </FormMessage>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="divisibility"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-1">
-                      Divisibility
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <CircleHelp className="w-4 h-4" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-[200px]">
-                            The number of subunits in a super unit of runes.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="Enter token divisibility"
-                        id="divisibility"
-                        type="number"
-                      />
-                    </FormControl>
-                    <FormMessage>
-                      {form.formState.errors.divisibility?.message}
-                    </FormMessage>
-                  </FormItem>
-                )}
-              />
-            </div>
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-1">
-                    Rootstock Address
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <CircleHelp className="w-4 h-4" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="max-w-[200px]">
-                          Enter the Rootstock address where runes will be minted
-                          into ERC20s
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="RSK address"
-                      id="address"
-                      type="text"
-                    />
-                  </FormControl>
-                  <FormMessage>
-                    {form.formState.errors.address?.message}
-                  </FormMessage>
-                </FormItem>
-              )}
-            />
-            <CardFooter className="px-0 relative z-0 justify-end">
-              <Button
-                className="mt-5 bg-white text-black"
-                type="submit"
-                variant={'outline'}
-                disabled={loading}
-              >
-                {loading ? 'Loading' : 'Etch Token'}
-              </Button>
-            </CardFooter>
-          </form>
-        </Form>
-        <Button
-          className="mt-5 bg-white text-black"
-          variant={'outline'}
-          onClick={fetchRunes}
-        >
-          {'fetch information'}
-        </Button>
-      </CardContent>
-    </Card>
+              <CardFooter className="px-0 relative z-0 justify-end">
+                <Button
+                  className="mt-5 bg-white text-black before:w-[104px]"
+                  type="submit"
+                  variant={'outline'}
+                  disabled={loading}
+                >
+                  {loading ? 'Loading' : 'Etch Token'}
+                </Button>
+              </CardFooter>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+      <RunesList
+        items={runes!}
+      />
+    </>
   )
 }

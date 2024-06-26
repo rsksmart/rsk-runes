@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { ethers } from 'ethers'
+import { ethers, BigNumberish } from 'ethers'
 import { address } from '../address'
 import rune1155 from '../abi/Rune1155.json'
 import { toast } from 'react-toastify'
-import { Rune } from '@/lib/types/RuneInfo'
+import { IRune } from '@/lib/types/RuneInfo'
+import { useAuth } from '@/app/context/AuthContext'
 
 const CONTRACT_ADDRESS = address.erc1155Token
 const ABI = rune1155.abi
@@ -12,14 +13,17 @@ export interface UseRuneERC1155Props {
   name: string
   symbol: string
   receiver: string
+  premine?: number
+  amount?: number
+  cap?: number
+  divisibility?: number
 }
 
 export const useRuneERC1155 = () => {
   const [txHash, setTxHash] = useState<string | null>(null)
-  const [runes, setRunes] = useState<Rune[] | null>(null)
-  const [contract, setContract] = useState<ethers.Contract | null>(null)
-  //replace for useAuth wallet address
-  const [user, setUser] = useState("")
+  const [contract, setContract] = useState<ethers.Contract | null>(null);
+  const [runes, setRunes] = useState<IRune[] | null>([])
+  const { address: walletAddress } = useAuth();
 
   useEffect(() => {
     connectToBlockchain()
@@ -49,7 +53,6 @@ export const useRuneERC1155 = () => {
       }
 
       //replace for useAuth wallet address
-      setUser(wallet.address)
       setContract(contractInstance)
       console.log('Rune Custom Hook Connected to RSK chain')
     } catch (error) {
@@ -80,16 +83,18 @@ export const useRuneERC1155 = () => {
       console.log('contract is ', contract)
 
       if (!contract) return
-      const items = await contract.getUserTokens(user)
+      console.log('walletAddress: ', walletAddress);
+      const items = await contract.getUserTokens(walletAddress)
       console.log('items', items)
       console.log('items', items.length)
       if (items.length === 0) return null
       console.log('item 0', items[0]?.toString() ?? 'no items')
-      let runes: Rune[] = []
+      let runes: IRune[] = []
       for (const item of items) {
-        const runeInfo = await contract.getTokenInfo(item, user)
+        console.log('item: ', item);
+        const runeInfo = await contract.getTokenInfo(item, walletAddress)
         console.log('itemInfo', runeInfo)
-        const newItem: Rune = {
+        const newItem: IRune = {
           uri: runeInfo[0],
           name: runeInfo[1],
           symbol: runeInfo[2],
@@ -107,6 +112,7 @@ export const useRuneERC1155 = () => {
       console.log('item 0 name is', runes[0].name)
       setRunes(runes)
     } catch (error) {
+      console.log('error: ', error)
       console.error('error on fetching ', error)
     }
   }
