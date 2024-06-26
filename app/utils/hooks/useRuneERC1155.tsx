@@ -23,6 +23,7 @@ export const useRuneERC1155 = () => {
   const [txHash, setTxHash] = useState<string | null>(null)
   const [contract, setContract] = useState<ethers.Contract | null>(null)
   const [runes, setRunes] = useState<IRune[] | null>([])
+  const [txStatus, setTxStatus] = useState<string | null>(null)
   const { address: walletAddress } = useAuth()
 
   useEffect(() => {
@@ -63,7 +64,7 @@ export const useRuneERC1155 = () => {
   const mintNonFungible = async (runeData: UseRuneERC1155Props) => {
     try {
       const { uri, name, symbol, receiver } = runeData
-
+      setTxStatus('processing')
       const txResponse = await contract!.mintNonFungible(
         `${uri} TODO: retrieve and save metadata`,
         name,
@@ -71,7 +72,7 @@ export const useRuneERC1155 = () => {
         receiver
       )
       const { hash } = await txResponse.wait()
-
+      setTxStatus('success')
       return hash
     } catch (error) {
       console.log({ error })
@@ -122,5 +123,6 @@ export const useRuneERC1155 = () => {
     getUserRunes,
     runes,
     contract,
+    txStatus,
   }
 }

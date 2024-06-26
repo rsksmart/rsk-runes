@@ -11,10 +11,17 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Fragment, useCallback, useEffect, useState } from 'react'
 import { formatAddress } from '@/lib/utils'
-import { getConfirmations, isConfirmed } from 'bc-runes-js'
+import {
+  getConfirmations,
+  isConfirmed,
+  //@ts-ignore
+} from 'bc-runes-js'
 import { toast } from 'react-toastify'
 import { postRequest } from '@/app/utils/apiRequests'
-import { UseRuneERC1155Props, useRuneERC1155 } from '@/app/utils/hooks/useRuneERC1155'
+import {
+  UseRuneERC1155Props,
+  useRuneERC1155,
+} from '@/app/utils/hooks/useRuneERC1155'
 
 type Props = {
   runeProps: UseRuneERC1155Props
@@ -37,25 +44,19 @@ export default function EtchingProgress({
   const [commitConfirmations, setCommitConfirmations] = useState(0)
   const [progress, setProgress] = useState(0)
   const [etchedConfirmed, setEtchedConfirmed] = useState(false)
+  const [txHash, setTxHash] = useState<string | null>(null)
   const [newRuneProps, setNewRuneProps] = useState<UseRuneERC1155Props>({
     uri: '',
     name: '',
     symbol: '',
-    receiver: ''
+    receiver: '',
   })
   const [updateStatusInterval, setUpdateStatusInterval] =
     useState<NodeJS.Timeout | null>(null)
   const commitConfirmationsThreshold = 6
-  const {
-    mintNonFungible
-  } = useRuneERC1155()
+  const { mintNonFungible, txStatus } = useRuneERC1155()
 
-  const {
-    uri,
-    name,
-    symbol,
-    receiver
-  } = runeProps
+  const { uri, name, symbol, receiver } = runeProps
 
   const executeMinting = useCallback(async () => {
     try {
@@ -70,7 +71,7 @@ export default function EtchingProgress({
       }
 
       const mintTxHash = await mintNonFungible(newRuneProps)
-
+      setTxHash(mintTxHash)
       toast.info(`Succesfully minted rune in tx ${mintTxHash}`)
       setNewRuneProps(newRuneProps)
     } catch (error) {
@@ -169,7 +170,7 @@ export default function EtchingProgress({
   const goToUrl = (url: string) => {
     window.open(url, '_blank')
   }
-
+  const newRune = () => {}
   return (
     <Card>
       <CardHeader className="space-x-20 w-50">
@@ -245,16 +246,10 @@ export default function EtchingProgress({
                 </p>
               </Fragment>
             )}
-            {txStatus === 'success' && createdReceipt && (
+            {txStatus === 'success' && (
               <Fragment>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {'Your rune has been minted successfully'}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {' Your new token address is'}
-                </p>
-                <p className="text-sm text-blue-600 dark:text-gray-400 cursor-pointer">
-                  {tokenAddress ?? "Couldn't get token address"}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {' Check TX of your minting on RSK'}
@@ -263,11 +258,11 @@ export default function EtchingProgress({
                   className="text-sm text-blue-600 dark:text-gray-400 cursor-pointer"
                   onClick={() =>
                     goToUrl(
-                      `${process.env.NEXT_PUBLIC_RSK_EXPLORER_URL}/${createdReceipt.hash}`
+                      `${process.env.NEXT_PUBLIC_RSK_EXPLORER_URL}/${txHash}`
                     )
                   }
                 >
-                  {`${process.env.NEXT_PUBLIC_RSK_EXPLORER_URL}/${createdReceipt.hash}`}
+                  {`${process.env.NEXT_PUBLIC_RSK_EXPLORER_URL}/${txHash}`}
                 </p>
               </Fragment>
             )}
@@ -275,7 +270,7 @@ export default function EtchingProgress({
         )}
       </CardContent>
       <CardFooter className="relative z-0 justify-end p-6">
-        {txStatus === 'success' && createdReceipt ? (
+        {txStatus === 'success' ? (
           <Button
             className="mt-5 bg-white text-black"
             type="submit"

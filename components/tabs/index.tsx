@@ -58,6 +58,15 @@ export default function TabsSection() {
             setEtchedFinished={setEtchedFinished}
           />
         )}
+        <EtchingProgress
+          runeProps={runePropsState}
+          commitTxHash={commitTxHash}
+          setRevealTxHash={setRevealTxHash}
+          setCommitTxHash={setCommitTxHash}
+          revealTxHash={revealTxHash}
+          etchedFinished={etchedFinished}
+          setEtchedFinished={setEtchedFinished}
+        />
       </TabsContent>
     </Tabs>
   )
