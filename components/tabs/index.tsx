@@ -2,10 +2,9 @@
 import { Tabs, TabsContent } from '@/components/ui/tabs'
 import EtchTab from '@/components/tabs/EtchTab'
 import { useEffect, useState } from 'react'
-import { FormData } from '@/app/utils/types'
-import RunesList from '@/components/tabs/RunesList'
 import EtchingProgress from '@/components/tabs/EtchingProgress'
 import { UseRuneERC1155Props } from '@/app/utils/hooks/useRuneERC1155'
+import RunesList from './RunesList'
 
 export default function TabsSection() {
   const [runePropsState, setRunePropsState] = useState<UseRuneERC1155Props>({
@@ -58,15 +57,9 @@ export default function TabsSection() {
             setEtchedFinished={setEtchedFinished}
           />
         )}
-        <EtchingProgress
-          runeProps={runePropsState}
-          commitTxHash={commitTxHash}
-          setRevealTxHash={setRevealTxHash}
-          setCommitTxHash={setCommitTxHash}
-          revealTxHash={revealTxHash}
-          etchedFinished={etchedFinished}
-          setEtchedFinished={setEtchedFinished}
-        />
+        {
+          !commitTxHash && <RunesList />
+        }
       </TabsContent>
     </Tabs>
   )

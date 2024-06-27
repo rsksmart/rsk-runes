@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import {
   Tooltip,
   TooltipContent,
@@ -20,13 +19,10 @@ import {
 import { CircleHelp } from 'lucide-react'
 import {
   Form,
-  FormField,
   FormItem,
   FormLabel,
   FormControl,
-  FormMessage,
 } from '@/components/ui/form'
-import { CustomInput } from './CustomInput'
 import { EtchTabProps, FormData } from '@/app/utils/types'
 import { formSchema } from '@/app/utils/schemas'
 import { toast } from 'react-toastify'
@@ -34,9 +30,8 @@ import { postRequest, getRequest } from '@/app/utils/apiRequests'
 import InputField from '../ui/InputField'
 import {
   UseRuneERC1155Props,
-  useRuneERC1155,
 } from '@/app/utils/hooks/useRuneERC1155'
-import RunesList from './RunesList'
+import { useAuth } from '@/app/context/AuthContext'
 
 export default function EtchTab({
   setRuneProps,
@@ -48,16 +43,16 @@ export default function EtchTab({
     defaultValues: {
       name: '',
       symbol: '',
-      premine: 0,
-      amount: 0,
-      cap: 0,
+      premine: 1,
+      amount: 1,
+      cap: 1,
       divisibility: 0,
       receiver: '',
     },
   })
-  const { getUserRunes, runes, contract } = useRuneERC1155()
+  const { address: walletAddress } = useAuth();
 
-  const [isNft, setIsNft] = useState<boolean>(false)
+  const [isNft, setIsNft] = useState<boolean>(true)
 
   const onSubmit = (data: UseRuneERC1155Props) => {
     setRuneProps(data)
@@ -66,16 +61,9 @@ export default function EtchTab({
   }
 
   useEffect(() => {
-    //The runes is an array of runes information for the user
-    console.log('first rune name is ', runes?.[0]?.name)
-    fetchRunes()
-  }, [contract])
+    form.setValue('receiver', walletAddress);
+  }, [])
 
-  const fetchRunes = async () => {
-    const fetchedRunes = await getUserRunes()
-    //here by calling getUserRunes we are fetching the runes for the user connected with Metamask
-    console.log('Fetched runes:', fetchedRunes)
-  }
   const handleEtch = async (data: FormData) => {
     try {
       setLoading(true)
@@ -147,6 +135,8 @@ export default function EtchTab({
                   <div className="flex gap-2">
                     <label className="flex relative items-center cursor-pointer">
                       <input
+                        disabled
+                        checked={isNft}
                         type="checkbox"
                         className="sr-only"
                         onChange={(e) => setIsNft(Boolean(e.target.checked))}
@@ -206,9 +196,10 @@ export default function EtchTab({
               </div>
               <InputField
                 form={form}
-                name="address"
+                name="receiver"
                 tooltip="Enter the Rootstock address where runes will be minted into ERC20s"
                 placeholder="RSK address"
+                disabled={isNft}
               />
               <CardFooter className="px-0 relative z-0 justify-end">
                 <Button
@@ -224,7 +215,6 @@ export default function EtchTab({
           </Form>
         </CardContent>
       </Card>
-      <RunesList items={runes!} />
     </>
   )
 }

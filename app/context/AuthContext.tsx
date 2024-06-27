@@ -1,4 +1,6 @@
 'use client';
+import { ROUTER } from '@/constants';
+import { IRune } from '@/lib/types/RuneInfo';
 import { ethers } from 'ethers';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
@@ -11,6 +13,8 @@ interface AuthContextType {
   logout: () => void;
   setAddress: React.Dispatch<React.SetStateAction<string>>
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>
+  setRune: React.Dispatch<React.SetStateAction<IRune | undefined>>
+  rune: IRune | undefined
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,6 +25,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [address, setAddress] = useState<string>('');
   const [provider, setProvider] = useState<ethers.BrowserProvider | undefined>(undefined);
+  const [rune, setRune] = useState<IRune | undefined>();
 
   const login = useCallback((provider: ethers.BrowserProvider) => {
     setProvider(provider);
@@ -34,13 +39,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   useEffect(() => {
-    if (isLoggedIn && pathname === '/') {
-      router.push('/runes');
+    if (isLoggedIn && pathname === ROUTER.INDEX) {
+      router.push(ROUTER.RUNES);
     }
   }, [pathname])
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout, provider, address, setAddress, setIsLoggedIn }}>
+    <AuthContext.Provider value={{ isLoggedIn, login, logout, provider, address, setAddress, setIsLoggedIn, setRune, rune }}>
       {children}
     </AuthContext.Provider>
   );

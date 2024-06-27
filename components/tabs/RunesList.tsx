@@ -1,10 +1,21 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
-import { Button } from '../ui/button'
-import { useRouter } from 'next/navigation'
-import { IRune } from '@/lib/types/RuneInfo'
+import RuneItem from './RuneItem'
+import { useRuneERC1155 } from '@/app/utils/hooks/useRuneERC1155'
+import { useEffect, useRef } from 'react'
 
-function RunesList({ items }: { items:IRune[] }) {
-  const route = useRouter();
+function RunesList() {
+  const { getUserRunes, runes, contract } = useRuneERC1155();
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    fetchRunes()
+    intervalRef.current = setInterval(fetchRunes, 30000);
+    return () => clearInterval(intervalRef.current!);
+  }, [contract]);
+  
+  const fetchRunes = async () => {
+    await getUserRunes()
+  }
   return (
     <div className='my-10 w-full'>
       <Card>
@@ -13,30 +24,13 @@ function RunesList({ items }: { items:IRune[] }) {
         </CardHeader>
         <CardContent>
           {
-            items?.length === 0 ?
+            runes?.length === 0 ?
               <div className='flex justify-center text-2xl text-gray-500 italic'>
                 No runes
               </div>
             :
-            items?.map((r, i) => (
-              <div key={i} className='flex justify-between items-center border border-input my-3 p-2 h-16 rounded-lg'>
-                <div className='flex flex-col justify-start items-start h-full'>
-                  <div className='text-gray-500'>Name</div>
-                  <div className='text-sm'>{ r.name }</div>
-                </div>
-                <div className='flex flex-col justify-start items-start h-full'>
-                  <div className='text-gray-500'>Symbol</div>
-                  <div className='text-sm'>{ r.symbol }</div>
-                </div>
-                <div className='flex flex-col justify-start items-start h-full'>
-                  <div className='text-gray-500'>Amount</div>
-                  <div className='text-sm'>{ r.maxSupply }</div>
-                </div>
-                <div className='flex gap-2'>
-                  <Button type='button' size={'sm'} onClick={() => route.push('/runes/runes-to-btc')}>Sent to BTC</Button>
-                  <Button type='button' size={'sm'} onClick={() => route.push('/runes/mint')}>Mint</Button>
-                </div>
-              </div>
+            runes?.map((rune, i) => (
+              <RuneItem key={i} rune={rune} />
             ))
           }
         </CardContent>
