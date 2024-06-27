@@ -135,13 +135,21 @@ contract RuneToken is ERC1155, Ownable {
         _addUserToken(receiver, tokenId);
     }
 
+    function isFrozen(string memory runeName, address owner) public view returns (bool) {
+        bytes32 tokenIdHash = keccak256(abi.encodePacked(runeName));
+        uint256 tokenId = uint256(tokenIdHash);
+        return _frozenTokens[tokenId][owner] > 0;
+    }
+
     /**
      * @dev Freezes tokens for a specific user
-     * @param tokenId ID of the token to freeze
+     * @param runeName the rune name of the token to convert to ID to freeze
      * @param amount Amount of tokens to freeze
      */
-    function freezeTokens(uint256 tokenId, uint256 amount, address owner) external onlyOwner {
+    function freezeTokens(string memory runeName, uint256 amount, address owner) external onlyOwner {
         require(amount > 0, "Amount must be greater than zero");
+        bytes32 tokenIdHash = keccak256(abi.encodePacked(runeName));
+        uint256 tokenId = uint256(tokenIdHash);
         require(balanceOf(owner, tokenId) >= amount, "Insufficient balance to freeze");
 
         _frozenTokens[tokenId][owner] += amount;
@@ -150,11 +158,13 @@ contract RuneToken is ERC1155, Ownable {
 
     /**
      * @dev Unfreezes tokens for a specific user
-     * @param tokenId ID of the token to unfreeze
+     * @param runeName the rune name of the token to convert to ID to unfreeze
      * @param amount Amount of tokens to unfreeze
      */
-    function unfreezeTokens(uint256 tokenId, uint256 amount, address owner) external onlyOwner{
+    function unfreezeTokens(string memory runeName, uint256 amount, address owner) external onlyOwner{
         require(amount > 0, "Amount must be greater than zero");
+        bytes32 tokenIdHash = keccak256(abi.encodePacked(runeName));
+        uint256 tokenId = uint256(tokenIdHash);
         require(_frozenTokens[tokenId][owner] >= amount, "Insufficient frozen balance to unfreeze");
 
         _frozenTokens[tokenId][owner] -= amount;

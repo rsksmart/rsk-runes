@@ -17,20 +17,13 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { CircleHelp } from 'lucide-react'
-import {
-  Form,
-  FormItem,
-  FormLabel,
-  FormControl,
-} from '@/components/ui/form'
+import { Form, FormItem, FormLabel, FormControl } from '@/components/ui/form'
 import { EtchTabProps, FormData } from '@/app/utils/types'
 import { formSchema } from '@/app/utils/schemas'
 import { toast } from 'react-toastify'
 import { postRequest, getRequest } from '@/app/utils/apiRequests'
 import InputField from '../ui/InputField'
-import {
-  UseRuneERC1155Props,
-} from '@/app/utils/hooks/useRuneERC1155'
+import { UseRuneERC1155Props } from '@/app/utils/hooks/useRuneERC1155'
 import { useAuth } from '@/app/context/AuthContext'
 
 export default function EtchTab({
@@ -50,7 +43,7 @@ export default function EtchTab({
       receiver: '',
     },
   })
-  const { address: walletAddress } = useAuth();
+  const { address: walletAddress } = useAuth()
 
   const [isNft, setIsNft] = useState<boolean>(true)
 
@@ -61,7 +54,7 @@ export default function EtchTab({
   }
 
   useEffect(() => {
-    form.setValue('receiver', walletAddress);
+    form.setValue('receiver', walletAddress)
   }, [])
 
   const handleEtch = async (data: FormData) => {

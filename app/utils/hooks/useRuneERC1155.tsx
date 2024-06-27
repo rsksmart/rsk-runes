@@ -76,6 +76,14 @@ export const useRuneERC1155 = () => {
     }
   }
 
+  const freezeToken = async (runeName: string) => {
+    try {
+    } catch (error) {
+      console.log('error on freezing token', error)
+      toast.error('Error on freezing token')
+    }
+  }
+
   const getUserRunes = async () => {
     try {
       if (!contract) return

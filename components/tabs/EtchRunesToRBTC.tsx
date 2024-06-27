@@ -33,7 +33,7 @@ import { useAuth } from '@/app/context/AuthContext'
 import InputField from '../ui/InputField'
 export default function EtchRunesToRBTC(): JSX.Element {
   const [loading, setLoading] = useState(false)
-  const { rune: runeToBTC } = useAuth();
+  const { rune: runeToBTC } = useAuth()
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -44,12 +44,11 @@ export default function EtchRunesToRBTC(): JSX.Element {
   })
 
   useEffect(() => {
-    console.log('runeToBTC: ', runeToBTC);
-    form.reset(runeToBTC);
-  }, []);
+    console.log('runeToBTC: ', runeToBTC)
+    form.reset(runeToBTC)
+  }, [])
 
-  const onSubmit = (data: FormData) => {
-  }
+  const onSubmit = (data: FormData) => {}
 
   return (
     <Card>
@@ -63,16 +62,16 @@ export default function EtchRunesToRBTC(): JSX.Element {
             <div className="grid md:grid-cols-2 gap-4">
               <InputField
                 form={form}
-                name='name'
-                placeholder='Enter rune name'
-                tooltip='Name of the rune. e.g. &quot;UNCOMMON•GOODS&quot;'
+                name="name"
+                placeholder="Enter rune name"
+                tooltip='Name of the rune. e.g. "UNCOMMON•GOODS"'
                 disabled
               />
-             <InputField
+              <InputField
                 form={form}
-                name='amount'
-                placeholder='Enter rune amount'
-                tooltip='Amount of the rune.'
+                name="amount"
+                placeholder="Enter rune amount"
+                tooltip="Amount of the rune."
                 disabled
               />
             </div>
