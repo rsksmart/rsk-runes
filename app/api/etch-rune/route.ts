@@ -17,22 +17,15 @@ export async function POST(request: NextRequest) {
   const data = await request.json()
   console.log('data in post request is ', data)
 
-  const TAPROOT_ADDRESS = process.env.NEXT_PUBLIC_TAPROOT_ADDRESS
-  const WIF = process.env.NEXT_PUBLIC_WIF
-
   try {
     const {
       action,
-      revealTxHash,
-      commitTxHash,
       name,
       symbol,
       premine,
       amount,
       cap,
-      address,
       divisibility,
-      scriptP2trAddress,
       tapLeafScript,
     } = data
     const deserializedTapLeafScript = tapLeafScript.map((item: any) => ({
@@ -84,32 +77,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ revealTxHash })
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
-    }
-
-    if (revealTxHash) {
-      await waitForTxToBeConfirmed(revealTxHash)
-    } else if (commitTxHash) {
-      await waitForTxToMature(commitTxHash)
-    } else {
-      const commitData = await commitTx({ name })
-      const { commitTxHash, scriptP2trAddress, tapLeafScript } = commitData
-      //espera y validación
-      await waitForTxToMature(commitTxHash) //este no lo usaría si lo actualizamos en el front con getConfirmations()
-      //
-      //cuando tenga más de 6 confirmaciones
-      const commitUtxo = await findUtxo(scriptP2trAddress, commitTxHash)
-      commitUtxo.tapLeafScript = tapLeafScript
-      const { revealTxHash } = await revealTx({
-        commitUtxo,
-        name,
-        amount,
-        cap,
-        symbol,
-        divisibility,
-        premine,
-      })
-      await waitForTxToBeConfirmed(revealTxHash)
-      return NextResponse.json({ revealTxHash })
     }
   } catch (error) {
     console.log('Error on submit:', error)

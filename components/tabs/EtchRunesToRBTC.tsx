@@ -40,6 +40,7 @@ import {
   isConfirmed,
   //@ts-ignore
 } from 'bc-runes-js'
+import { getRequest, postRequest } from '@/app/utils/apiRequests'
 
 export default function EtchRunesToRBTC(): JSX.Element {
   const [updateStatusInterval, setUpdateStatusInterval] =
@@ -117,13 +118,18 @@ export default function EtchRunesToRBTC(): JSX.Element {
       console.log('entering to processBTCRuneSend')
 
       setProcessingRuneTransfer(true)
-      const runeId = await getRuneIdByName(name)
-      console.log('runeId is: ', runeId)
-
-      return
-      const transferRuneTxHash = await transferTx([
-        { amount: 1, to: recepientAddressBtc, runeId },
-      ])
+      const response = await getRequest(
+        `/api/transfer-rune?name=${name}&action=getIdByName`
+      )
+      console.log('runeId is: ', response.runeId)
+      const runeId = response.runeId
+      const transferRuneTxHash = await postRequest('/api/transfer-rune', {
+        action: 'transferRune',
+        amount: 1,
+        to: recepientAddressBtc,
+        runeId,
+      })
+      console.log('transferRuneTxHash: ', transferRuneTxHash)
       localStorage.setItem(
         'runeToBTCData',
         JSON.stringify({ ...freezeTxData, transferRuneTxHash })
@@ -169,6 +175,9 @@ export default function EtchRunesToRBTC(): JSX.Element {
     setUpdateStatusInterval(interval)
     return () => clearInterval(interval)
   }, [updateStatus, transferWaiting])
+  const goToUrl = (url: string) => {
+    window.open(url, '_blank')
+  }
   return (
     <Card>
       <CardHeader>
@@ -237,6 +246,23 @@ export default function EtchRunesToRBTC(): JSX.Element {
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     {`Status is ${freezeTxData?.freezeTxHash ? '--completed--' : txFreezeStatus ?? '--starting--'}`}
                   </p>
+                  {freezeTxData?.freezeTxHash && (
+                    <Fragment>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {' Check status of your minting on RSK'}
+                      </p>
+                      <p
+                        className="text-sm text-blue-600 dark:text-gray-400 cursor-pointer"
+                        onClick={() =>
+                          goToUrl(
+                            `${process.env.NEXT_PUBLIC_RSK_EXPLORER_URL}/${freezeTxData?.freezeTxHash}`
+                          )
+                        }
+                      >
+                        {`${process.env.NEXT_PUBLIC_RSK_EXPLORER_URL}/${freezeTxData?.freezeTxHash}`}
+                      </p>
+                    </Fragment>
+                  )}
                 </div>
                 {processingRuneTransfer && (
                   <div className="space-y-2">

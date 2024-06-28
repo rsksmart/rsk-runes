@@ -77,7 +77,7 @@ export default function EtchTab({
         setLoading(false)
         return
       }
-      const commitData = await postRequest({
+      const commitData = await postRequest('/api/etch-rune', {
         name: data.name,
         action: 'commitTx',
       })

@@ -125,7 +125,7 @@ export default function EtchingProgress({
           script: item.script.toString('base64'),
         }))
 
-        const { revealTxHash } = await postRequest({
+        const { revealTxHash } = await postRequest('/api/etch-rune', {
           action: 'revealTx',
           scriptP2trAddress: data.scriptP2trAddress,
           tapLeafScript: serializedTapLeafScript,

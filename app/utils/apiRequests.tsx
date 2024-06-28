@@ -1,9 +1,3 @@
-interface commitTxData {
-  action: string
-  name?: string
-  scriptP2trAddress?: string
-  tapLeafScript?: string
-}
 export const getRequest = async (url: string) => {
   try {
     const response = await fetch(url)
@@ -14,9 +8,9 @@ export const getRequest = async (url: string) => {
     return { error: 'Internal Server Error' }
   }
 }
-export const postRequest = async (data: commitTxData) => {
+export const postRequest = async (url: string, data: any) => {
   try {
-    const response = await fetch('/api/etch-rune', {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
