@@ -18,12 +18,19 @@ export interface UseRuneERC1155Props {
   cap?: number
   divisibility?: number
 }
-
+export interface FreezeTxData {
+  runeName: string
+  amount: BigNumberish
+  receiver: string
+  freezeTxHash?: string
+  transferRuneTxHash?: string
+}
 export const useRuneERC1155 = () => {
   const [txHash, setTxHash] = useState<string | null>(null)
   const [contract, setContract] = useState<ethers.Contract | null>(null)
   const [runes, setRunes] = useState<IRune[] | null>([])
   const [txStatus, setTxStatus] = useState<string | null>(null)
+  const [txFreezeStatus, setTxFreezeStatus] = useState<string | null>(null)
   const { address: walletAddress } = useAuth()
 
   useEffect(() => {
@@ -76,8 +83,17 @@ export const useRuneERC1155 = () => {
     }
   }
 
-  const freezeToken = async (runeName: string) => {
+  const freezeNonFungible = async (runeName: string) => {
     try {
+      setTxFreezeStatus('processing')
+      const txResponse = await contract!.freezeTokens(
+        runeName,
+        '1',
+        walletAddress
+      )
+      const { hash } = await txResponse.wait()
+      setTxFreezeStatus('success')
+      return hash
     } catch (error) {
       console.log('error on freezing token', error)
       toast.error('Error on freezing token')
@@ -115,8 +131,10 @@ export const useRuneERC1155 = () => {
     txHash,
     mintNonFungible,
     getUserRunes,
+    freezeNonFungible,
     runes,
     contract,
     txStatus,
+    txFreezeStatus,
   }
 }

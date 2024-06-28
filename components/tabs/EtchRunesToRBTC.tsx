@@ -1,8 +1,9 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { FormEvent, Fragment, useCallback, useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
+import { Label } from '../ui/label'
 import {
   Card,
   CardContent,
@@ -27,29 +28,147 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { CustomInput } from './CustomInput'
-import { FormData } from '@/app/utils/types'
-import { formSchema } from '@/app/utils/schemas'
+import { FormData, FormDataRuneToBTC } from '@/app/utils/types'
+import { formSchemaRuneToBTC } from '@/app/utils/schemas'
 import { useAuth } from '@/app/context/AuthContext'
 import InputField from '../ui/InputField'
+import { FreezeTxData, useRuneERC1155 } from '@/app/utils/hooks/useRuneERC1155'
+import { toast } from 'react-toastify'
+import {
+  getRuneIdByName,
+  transferTx,
+  isConfirmed,
+  //@ts-ignore
+} from 'bc-runes-js'
+
 export default function EtchRunesToRBTC(): JSX.Element {
+  const [updateStatusInterval, setUpdateStatusInterval] =
+    useState<NodeJS.Timeout | null>(null)
   const [loading, setLoading] = useState(false)
+  const [processingRuneTransfer, setProcessingRuneTransfer] = useState(false)
+  const [transferWaiting, setTransferWaiting] = useState(false)
+  const [processFinished, setProcessFinished] = useState(false)
+  const [freezeTxData, setFreezeTxData] = useState<FreezeTxData | null>(null)
+  const [recepientAddressBtc, setRecepientAddressBtc] = useState<string | null>(
+    null
+  )
+  const { freezeNonFungible, txFreezeStatus } = useRuneERC1155()
   const { rune: runeToBTC } = useAuth()
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<FormDataRuneToBTC>({
+    resolver: zodResolver(formSchemaRuneToBTC),
     defaultValues: {
       name: '',
-      amount: 1,
+      amount: '1',
       address: '',
     },
   })
 
   useEffect(() => {
-    console.log('runeToBTC: ', runeToBTC)
-    form.reset(runeToBTC)
+    const runeToBTCData = localStorage.getItem('runeToBTCData')
+    const runeToBTCDataParsed: FreezeTxData = runeToBTCData
+      ? JSON.parse(runeToBTCData)
+      : null
+    if (runeToBTCDataParsed) {
+      //if the freeze process is already done
+      setFreezeTxData(runeToBTCDataParsed)
+      console.log('runeToBTCDataParsed: ', runeToBTCDataParsed)
+      if (runeToBTCDataParsed.transferRuneTxHash) {
+        //if the transfer of the rune in btc is already in process
+      } else {
+        //if the freeze on rsk is done but transfer  in btc is not started
+        processBTCRuneSend(runeToBTCDataParsed.runeName)
+      }
+      setLoading(true)
+    } else {
+      //if there is not freeze on rsk process yet
+      console.log('runeToBTC: ', runeToBTC)
+      form.reset(runeToBTC)
+    }
   }, [])
 
-  const onSubmit = (data: FormData) => {}
+  const onSubmit = (data: FormDataRuneToBTC) => {
+    console.log('Form data submitted: ', data)
+    setRecepientAddressBtc(data.address)
+    processRSKFreeze(data)
+  }
+  const processRSKFreeze = async (data: FormDataRuneToBTC) => {
+    setLoading(true)
+    try {
+      const freezeTxHash = await freezeNonFungible(data.name)
+      console.log('freezeTxHash: ', freezeTxHash)
+      const runeToBTCData: FreezeTxData = {
+        runeName: data.name,
+        amount: parseInt(data.amount),
+        receiver: data.address,
+        freezeTxHash,
+      }
+      setFreezeTxData(runeToBTCData)
+      localStorage.setItem('runeToBTCData', JSON.stringify(runeToBTCData))
+    } catch (error) {
+      console.error('Error freezing rune: ', error)
+      toast.error('Error freezing rune on RSK')
+    } finally {
+      toast.success('Rune frozen successfully')
+      processBTCRuneSend(data.name)
+    }
+  }
+  const processBTCRuneSend = async (name: string) => {
+    try {
+      console.log('entering to processBTCRuneSend')
 
+      setProcessingRuneTransfer(true)
+      const runeId = await getRuneIdByName(name)
+      console.log('runeId is: ', runeId)
+
+      return
+      const transferRuneTxHash = await transferTx([
+        { amount: 1, to: recepientAddressBtc, runeId },
+      ])
+      localStorage.setItem(
+        'runeToBTCData',
+        JSON.stringify({ ...freezeTxData, transferRuneTxHash })
+      )
+    } catch (error) {
+      console.error('Error sending rune to BTC: ', error)
+      toast.error('Error sending rune to BTC')
+    } finally {
+      setTransferWaiting(true)
+    }
+  }
+  const updateStatus = useCallback(async () => {
+    try {
+      if (!transferWaiting || !freezeTxData?.transferRuneTxHash) return
+      const confirmed = await isConfirmed(freezeTxData?.transferRuneTxHash)
+      if (confirmed) {
+        toast.success('Rune transfer to BTC has been confirmed')
+        setProcessFinished(true)
+        form.reset()
+        form.setValue('amount', '0')
+        resetProcess()
+      }
+    } catch (error) {
+      console.log('Error updating status: ', error)
+      toast.error('Error reading process status, please refresh the page.')
+    }
+  }, [])
+  const resetProcess = () => {
+    setFreezeTxData(null)
+    setRecepientAddressBtc(null)
+    setTransferWaiting(false)
+    setProcessingRuneTransfer(false)
+    setLoading(false)
+    if (updateStatusInterval) clearInterval(updateStatusInterval)
+    setUpdateStatusInterval(null)
+    localStorage.removeItem('runeToBTCData')
+  }
+  useEffect(() => {
+    updateStatus()
+    const interval = setInterval(() => {
+      updateStatus()
+    }, 10000)
+    setUpdateStatusInterval(interval)
+    return () => clearInterval(interval)
+  }, [updateStatus, transferWaiting])
   return (
     <Card>
       <CardHeader>
@@ -108,6 +227,40 @@ export default function EtchRunesToRBTC(): JSX.Element {
                 </FormItem>
               )}
             />
+            {loading && (
+              <Fragment>
+                <div className="space-y-2">
+                  <Label>{'Step 1. Freeze Rune in Rootstock network.'}</Label>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {"Blocking your rune's token in the contract"}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {`Status is ${freezeTxData?.freezeTxHash ? '--completed--' : txFreezeStatus ?? '--starting--'}`}
+                  </p>
+                </div>
+                {processingRuneTransfer && (
+                  <div className="space-y-2">
+                    <Label>
+                      Step 2. Transferring Rune in BTC network . . .
+                    </Label>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {"Blocking your rune's token in the contract"}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {`Status is ${transferWaiting ? '--completed--' : '--transferring--'}`}
+                    </p>
+                  </div>
+                )}
+              </Fragment>
+            )}
+            {processFinished && (
+              <div className="space-y-2">
+                <Label>Process Finished</Label>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Rune has been successfully transferred to BTC
+                </p>
+              </div>
+            )}
             <CardFooter className="px-0 relative z-0 justify-end">
               <Button
                 className="mt-5 bg-white text-black before:w-[120px]"
@@ -115,7 +268,7 @@ export default function EtchRunesToRBTC(): JSX.Element {
                 variant={'outline'}
                 disabled={loading}
               >
-                {loading ? 'Loading' : 'Runes to BTC'}
+                {loading ? 'Loading Tx' : 'Runes to BTC'}
               </Button>
             </CardFooter>
           </form>

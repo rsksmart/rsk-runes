@@ -7,6 +7,11 @@ export interface FormData {
   divisibility?: number
   address?: string
 }
+export interface FormDataRuneToBTC {
+  name: string
+  amount: string
+  address: string
+}
 
 export interface EtchTabProps {
   setRuneProps: Function
