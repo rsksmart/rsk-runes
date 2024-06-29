@@ -2,13 +2,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import {
   commitTx,
-  waitForTxToMature,
   revealTx,
   findUtxo,
-  waitForTxToBeConfirmed,
   getRuneIdByName,
   init,
-  generateAddresses,
   getConfirmations,
   //@ts-ignore
 } from 'bc-runes-js'
@@ -37,7 +34,7 @@ export async function POST(request: NextRequest) {
     const initVariables = {
       taprootAddress: process.env.NEXT_PUBLIC_TAPROOT_ADDRESS ?? '',
       wif: process.env.NEXT_PUBLIC_WIF ?? '',
-      feePerByte: 350,
+      feePerVByte: 120,
     }
     console.log('initVariables:', initVariables)
 
@@ -100,11 +97,7 @@ export async function GET(request: NextRequest) {
             { status: 400 }
           )
         }
-        console.log('name:', name)
-
         const hasRuneByID = await getRuneIdByName(name)
-        console.log('hasRuneByID:', hasRuneByID)
-
         if (hasRuneByID && hasRuneByID[0]) {
           return NextResponse.json({
             message: `The name (${name}) is already in use`,

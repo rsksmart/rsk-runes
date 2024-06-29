@@ -56,7 +56,6 @@ export default function EtchTab({
   useEffect(() => {
     form.setValue('receiver', walletAddress)
   }, [])
-
   const handleEtch = async (data: FormData) => {
     try {
       setLoading(true)

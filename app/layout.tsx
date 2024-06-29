@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className='h-screen'>
+      <body className="h-screen">
         <AuthProvider>
           <TooltipProvider>{children}</TooltipProvider>
           <ToastContainer />

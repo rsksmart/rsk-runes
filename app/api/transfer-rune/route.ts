@@ -4,6 +4,7 @@ import {
   getRuneIdByName,
   getConfirmations,
   transferTx,
+  init,
   //@ts-ignore
 } from 'bc-runes-js'
 
@@ -12,8 +13,19 @@ export async function POST(request: NextRequest) {
   console.log('data in post request is ', data)
   try {
     const { action, amount, to, runeId } = data
+    const taprootAddress = process.env.NEXT_PUBLIC_TAPROOT_ADDRESS
+    const wif = process.env.NEXT_PUBLIC_WIF
+    const initVariables = {
+      taprootAddress,
+      wif,
+      feePerVByte: 120,
+    }
+    console.log('initVariables:', initVariables)
+    init(initVariables)
+    console.log('Initiated correctly')
     switch (action) {
       case 'transferRune':
+        console.log('transferRune:', amount, to, runeId)
         const txHash = await transferTx([{ amount, to, runeId }])
         return NextResponse.json({ txHash })
       default:

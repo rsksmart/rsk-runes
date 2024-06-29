@@ -115,7 +115,7 @@ export const useRuneERC1155 = () => {
           maxSupply: runeInfo[3].toString(),
           currentSupply: runeInfo[4].toString(),
           defaultMintAmount: runeInfo[5].toString(),
-          userBalance: runeInfo[6].toString(),
+          userBalance: runeInfo[6][1].toString(),
           tokenId: item.toString(),
         }
         runes.push(newItem)

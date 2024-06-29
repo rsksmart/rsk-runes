@@ -57,9 +57,7 @@ export default function TabsSection() {
             setEtchedFinished={setEtchedFinished}
           />
         )}
-        {
-          !commitTxHash && <RunesList />
-        }
+        {!commitTxHash && <RunesList />}
       </TabsContent>
     </Tabs>
   )
