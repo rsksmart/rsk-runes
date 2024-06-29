@@ -38,7 +38,7 @@ export default function EtchTab({
       symbol: '',
       premine: 1,
       amount: 1,
-      cap: 1,
+      cap: 0,
       divisibility: 0,
       receiver: '',
     },
