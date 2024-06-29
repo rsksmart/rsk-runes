@@ -19,7 +19,7 @@
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.0.7",
     "axios": "^1.7.2",
-    "bc-runes-js": "^0.3.0",
+    "bc-runes-js": "^0.3.2",
     "bitcoinjs-lib": "^6.1.5",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
