@@ -1,13 +1,10 @@
 import { useEffect, useState } from 'react'
 import { ethers, BigNumberish } from 'ethers'
-import { address } from '../address'
 import rune1155 from '../abi/Rune1155.json'
 import { toast } from 'react-toastify'
 import { IRune } from '@/lib/types/RuneInfo'
 import { useAuth } from '@/app/context/AuthContext'
 
-const CONTRACT_ADDRESS = address.erc1155Token
-const ABI = rune1155.abi
 export interface UseRuneERC1155Props {
   uri: string
   name: string
@@ -27,56 +24,53 @@ export interface FreezeTxData {
 }
 export const useRuneERC1155 = () => {
   const [txHash, setTxHash] = useState<string | null>(null)
-  const [contract, setContract] = useState<ethers.Contract | null>(null)
   const [runes, setRunes] = useState<IRune[] | null>([])
   const [txStatus, setTxStatus] = useState<string | null>(null)
   const [txFreezeStatus, setTxFreezeStatus] = useState<string | null>(null)
   const { address: walletAddress } = useAuth()
 
-  useEffect(() => {
-    connectToBlockchain()
-  }, [])
-  const connectToBlockchain = async () => {
-    const PK = process.env.NEXT_PUBLIC_APP_PK
-    const rpcProvider = new ethers.JsonRpcProvider(
-      process.env.NEXT_PUBLIC_RPC_URL
-    )
+  const PK = process.env.NEXT_PUBLIC_APP_PK!
+  const RPC_URL = new ethers.JsonRpcProvider(
+    process.env.NEXT_PUBLIC_RPC_URL
+  )
+  const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!
+  const ABI = rune1155.abi
 
-    if (!rpcProvider || !PK) {
-      console.error('Not able to connect to blockchain')
-      return
-    }
-    try {
-      const wallet = new ethers.Wallet(PK, rpcProvider)
-      const contractInstance = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        ABI,
-        wallet
-      )
+  const wallet = new ethers.Wallet(PK, RPC_URL)
+  const contract = new ethers.Contract(
+    CONTRACT_ADDRESS,
+    ABI,
+    wallet
+  )
 
-      if (!contractInstance) {
-        throw new Error('There was a problem retrieving RuneToken contract.')
-      } else if (!wallet) {
-        throw new Error('There was a problem connecting with Metamask.')
-      }
-      setContract(contractInstance)
-    } catch (error) {
-      toast.error('Error loading signer on Rune hook')
-    }
+  if (!PK) {
+    throw new Error('Set private key')
+  }
+  if (!RPC_URL) {
+    throw new Error('Set network RPC url')
+  }
+  if (!CONTRACT_ADDRESS) {
+    throw new Error('Set RuneToken contract address')
+  }
+  if (!contract) {
+    throw new Error(`Error instantiating contract ${CONTRACT_ADDRESS}`)
+  }
+  if (!wallet) {
+    throw new Error('Error instantiating a wallet with given private key and RPC url')
   }
 
   const mintNonFungible = async (runeData: UseRuneERC1155Props) => {
     try {
       const { uri, name, symbol, receiver } = runeData
       setTxStatus('processing')
-      const txResponse = await contract!.mintNonFungible(
+      const txResponse = await contract.mintNonFungible(
         `${uri} TODO: retrieve and save metadata`,
         name,
         symbol,
         receiver
       )
       const { hash } = await txResponse.wait()
-      setTxStatus('success')
+      if (hash) setTxStatus('success')
       return hash
     } catch (error) {
       console.log({ error })
@@ -86,7 +80,7 @@ export const useRuneERC1155 = () => {
   const freezeNonFungible = async (runeName: string) => {
     try {
       setTxFreezeStatus('processing')
-      const txResponse = await contract!.freezeTokens(
+      const txResponse = await contract.freezeTokens(
         runeName,
         '1',
         walletAddress
@@ -102,7 +96,6 @@ export const useRuneERC1155 = () => {
 
   const getUserRunes = async () => {
     try {
-      if (!contract) return
       const items = await contract.getUserTokens(walletAddress)
       if (items.length === 0) return null
       let runes: IRune[] = []
