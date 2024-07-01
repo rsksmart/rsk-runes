@@ -44,6 +44,7 @@ export default function EtchingProgress({
   const [commitConfirmations, setCommitConfirmations] = useState(0)
   const [progress, setProgress] = useState(0)
   const [etchedConfirmed, setEtchedConfirmed] = useState(false)
+  const [finishedMinting, setFinishedMinting] = useState(false)
   const [txHash, setTxHash] = useState<string | null>(null)
   const [newRuneProps, setNewRuneProps] = useState<UseRuneERC1155Props>({
     uri: '',
@@ -62,18 +63,20 @@ export default function EtchingProgress({
     try {
       console.log('minting rune')
       if (updateStatusInterval) clearInterval(updateStatusInterval!)
-      if (!name || !symbol || !uri || !receiver) return
+      if (!name || !symbol || !receiver) return
+
       const newRuneProps: UseRuneERC1155Props = {
         uri,
         receiver,
-        name: name,
-        symbol: symbol,
+        name,
+        symbol,
       }
 
       const mintTxHash = await mintNonFungible(newRuneProps)
       setTxHash(mintTxHash)
       toast.info(`Succesfully minted rune in tx ${mintTxHash}`)
       setNewRuneProps(newRuneProps)
+      return mintTxHash
     } catch (error) {
       toast.error('Error minting the rune')
     }
@@ -88,12 +91,19 @@ export default function EtchingProgress({
       if (revealTxHash) {
         const confirmed = await isConfirmed(revealTxHash)
         setEtchedFinished(confirmed)
-        console.log('is confirmed?', confirmed)
+
         if (confirmed) {
-          toast.success('Etching process has been confirmed successfully')
+          toast.success(`The rune ${name} has been etched on Bitcoin. Now minting it on Rootstock.`)
           setEtchedConfirmed(true)
-          toast.info('Proceeding with minting . . .')
-          executeMinting()
+
+          if (!finishedMinting) {
+            const success = await executeMinting()
+            if (success) {
+              setFinishedMinting(true)
+            } else {
+              throw new Error('Error at minting on Rootstock')
+            }
+          }
         }
       } else if (commitTxHash) {
         const confirmations = await getConfirmations(commitTxHash)
@@ -170,7 +180,7 @@ export default function EtchingProgress({
   const goToUrl = (url: string) => {
     window.open(url, '_blank')
   }
-  const newRune = () => {}
+
   return (
     <Card>
       <CardHeader className="space-x-20 w-50">
@@ -270,23 +280,13 @@ export default function EtchingProgress({
         )}
       </CardContent>
       <CardFooter className="relative z-0 justify-end p-6">
-        {txStatus === 'success' ? (
-          <Button
-            className="mt-5 bg-white text-black"
-            type="submit"
-            onClick={newRune}
-          >
-            {'Create a new rune'}
-          </Button>
-        ) : (
-          <Button
-            className="mt-5 bg-white text-black"
-            type="submit"
-            disabled={true}
-          >
-            {etchedFinished ? 'Minting tokens on RSK' : 'Etching Rune ...'}
-          </Button>
-        )}
+        <Button
+          className="mt-5 bg-white text-black"
+          type="submit"
+          disabled={true}
+        >
+          {etchedFinished ? 'Minting tokens on RSK' : 'Etching Rune ...'}
+        </Button>
       </CardFooter>
     </Card>
   )
