@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       divisibility,
       tapLeafScript,
     } = data
-    const deserializedTapLeafScript = tapLeafScript.map((item: any) => ({
+    const deserializedTapLeafScript = tapLeafScript?.map((item: any) => ({
       controlBlock: Buffer.from(item.controlBlock, 'base64'),
       leafVersion: item.leafVersion,
       script: Buffer.from(item.script, 'base64'),
