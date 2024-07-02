@@ -50,7 +50,7 @@ export default function EtchingProgress({
 }: Props): JSX.Element {
   const [commitConfirmations, setCommitConfirmations] = useState(0)
 
-  const commitConfirmationsThreshold = 1
+  const commitConfirmationsThreshold = 3
   const [remainingCommitConfirmations, setRemainingCommitConfirmations] =
     useState(commitConfirmationsThreshold)
 
@@ -73,7 +73,6 @@ export default function EtchingProgress({
         name,
         symbol,
       }
-
       const { hash } = await mintNonFungible(newRuneProps)
       localStorage.setItem('mintTxHash', hash)
       setMintTxHash(hash)
@@ -83,14 +82,10 @@ export default function EtchingProgress({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
   const updateStatus = useCallback(async () => {
     try {
-      console.log('updating status call')
-
       if (mintTxHash) {
         const isConfirmed = await isTxConfirmed(mintTxHash)
-
         if (isConfirmed) {
           if (updateStatusInterval) clearInterval(updateStatusInterval!)
           toast.info(`Succesfully minted rune in tx ${mintTxHash}`)
@@ -102,6 +97,7 @@ export default function EtchingProgress({
           setMintFinished(true)
         }
       } else if (revealTxHash) {
+        if (etchedConfirmed) return
         const confirmed = await isConfirmed(revealTxHash)
         setEtchedFinished(confirmed)
 
@@ -113,6 +109,7 @@ export default function EtchingProgress({
           executeMinting()
         }
       } else if (commitTxHash) {
+        if (etchedConfirmed) return
         const confirmations = await getConfirmations(commitTxHash)
         setCommitConfirmations(confirmations)
         setRemainingCommitConfirmations(
@@ -122,7 +119,7 @@ export default function EtchingProgress({
     } catch (error) {
       toast.error('Error updating the status of the etching process')
     }
-  }, [])
+  }, [etchedConfirmed, mintTxHash, commitTxHash, revealTxHash, executeMinting])
 
   const executeRevealTxHash = useCallback(async () => {
     try {
@@ -173,9 +170,11 @@ export default function EtchingProgress({
   }, [updateStatus])
 
   useEffect(() => {
-    setProgress(
-      Math.round((commitConfirmations / commitConfirmationsThreshold) * 100)
-    )
+    if (commitConfirmations > 0) {
+      setProgress(
+        Math.round((commitConfirmations / commitConfirmationsThreshold) * 100)
+      )
+    }
     if (!remainingCommitConfirmations) {
       executeRevealTxHash()
     }
