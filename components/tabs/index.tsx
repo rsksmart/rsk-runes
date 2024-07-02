@@ -18,22 +18,27 @@ export default function TabsSection() {
   } as UseRuneERC1155Props)
   const [commitTxHash, setCommitTxHash] = useState<string | null>(null)
   const [revealTxHash, setRevealTxHash] = useState<string | null>(null)
+  const [mintTxHash, setMintTxHash] = useState<string | null>(null)
   const [etchedFinished, setEtchedFinished] = useState(false)
+  const [mintFinished, setMintFinished] = useState(false)
 
   useEffect(() => {
+    const mintTxHash = localStorage.getItem('mintTxHash')
+
+    if (mintTxHash) {
+      setMintTxHash(mintTxHash)
+    }
+
     const { revealTxHash, commitTxHash, runeProps } = JSON.parse(
       localStorage.getItem('runeData') || '{}'
     )
+
     if (runeProps) {
       setRunePropsState(runeProps)
       setRevealTxHash(revealTxHash ?? null)
       setCommitTxHash(commitTxHash ?? null)
     }
   }, [])
-
-  useEffect(() => {
-    console.log('new revealtxhash is ', revealTxHash)
-  }, [revealTxHash])
 
   return (
     <Tabs
@@ -48,10 +53,14 @@ export default function TabsSection() {
           />
         ) : (
           <EtchingProgress
+            mintTxHash={mintTxHash}
+            setMintTxHash={setMintTxHash}
+            mintFinished={mintFinished}
+            setMintFinished={setMintFinished}
             runeProps={runePropsState}
             commitTxHash={commitTxHash}
-            setRevealTxHash={setRevealTxHash}
             setCommitTxHash={setCommitTxHash}
+            setRevealTxHash={setRevealTxHash}
             revealTxHash={revealTxHash}
             etchedFinished={etchedFinished}
             setEtchedFinished={setEtchedFinished}
