@@ -1,6 +1,5 @@
 import {
   CardTitle,
-  CardDescription,
   CardHeader,
   CardContent,
   CardFooter,
@@ -24,57 +23,62 @@ import {
 } from '@/app/utils/hooks/useRuneERC1155'
 
 type Props = {
+  mintTxHash: string | null
+  setMintTxHash: (mintTxHash: string | null) => void
+  mintFinished: boolean
+  setMintFinished: (finished: boolean) => void
   runeProps: UseRuneERC1155Props
   commitTxHash: string | null
+  setCommitTxHash: (commitTxHash: string) => void
   setRevealTxHash: (revealTxHash: string | null) => void
-  setCommitTxHash: (commitTxHash: string | null) => void
   revealTxHash: string | null
   etchedFinished: boolean
   setEtchedFinished: (etchedFinished: boolean) => void
 }
 export default function EtchingProgress({
+  mintTxHash,
+  setMintTxHash,
+  mintFinished,
+  setMintFinished,
   runeProps,
   commitTxHash,
+  setCommitTxHash,
   setRevealTxHash,
   revealTxHash,
   etchedFinished,
   setEtchedFinished,
-  setCommitTxHash,
 }: Props): JSX.Element {
   const [commitConfirmations, setCommitConfirmations] = useState(0)
+
+  const commitConfirmationsThreshold = 1
+  const [remainingCommitConfirmations, setRemainingCommitConfirmations] =
+    useState(commitConfirmationsThreshold)
+
   const [progress, setProgress] = useState(0)
   const [etchedConfirmed, setEtchedConfirmed] = useState(false)
-  const [txHash, setTxHash] = useState<string | null>(null)
-  const [newRuneProps, setNewRuneProps] = useState<UseRuneERC1155Props>({
-    uri: '',
-    name: '',
-    symbol: '',
-    receiver: '',
-  })
+
   const [updateStatusInterval, setUpdateStatusInterval] =
     useState<NodeJS.Timeout | null>(null)
-  const commitConfirmationsThreshold = 6
-  const { mintNonFungible, txStatus } = useRuneERC1155()
+  const { mintNonFungible, isTxConfirmed } = useRuneERC1155()
 
   const { uri, name, symbol, receiver } = runeProps
 
   const executeMinting = useCallback(async () => {
     try {
-      console.log('minting rune')
-      if (updateStatusInterval) clearInterval(updateStatusInterval!)
-      if (!name || !symbol || !uri || !receiver) return
+      if (!name || !symbol || !receiver) return
+
       const newRuneProps: UseRuneERC1155Props = {
         uri,
         receiver,
-        name: name,
-        symbol: symbol,
+        name,
+        symbol,
       }
 
-      const mintTxHash = await mintNonFungible(newRuneProps)
-      setTxHash(mintTxHash)
-      toast.info(`Succesfully minted rune in tx ${mintTxHash}`)
-      setNewRuneProps(newRuneProps)
+      const { hash } = await mintNonFungible(newRuneProps)
+      localStorage.setItem('mintTxHash', hash)
+      setMintTxHash(hash)
     } catch (error) {
+      console.log(error)
       toast.error('Error minting the rune')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,31 +88,41 @@ export default function EtchingProgress({
     try {
       console.log('updating status call')
 
-      if (etchedConfirmed) return
-      if (revealTxHash) {
+      if (mintTxHash) {
+        const isConfirmed = await isTxConfirmed(mintTxHash)
+
+        if (isConfirmed) {
+          if (updateStatusInterval) clearInterval(updateStatusInterval!)
+          toast.info(`Succesfully minted rune in tx ${mintTxHash}`)
+          localStorage.removeItem('runeData')
+          localStorage.removeItem('mintTxHash')
+          setCommitTxHash('')
+          setRevealTxHash('')
+          setMintTxHash('')
+          setMintFinished(true)
+        }
+      } else if (revealTxHash) {
         const confirmed = await isConfirmed(revealTxHash)
         setEtchedFinished(confirmed)
-        console.log('is confirmed?', confirmed)
+
         if (confirmed) {
-          toast.success('Etching process has been confirmed successfully')
+          toast.success(
+            `The rune ${name} has been etched on Bitcoin. Now minting it on Rootstock.`
+          )
           setEtchedConfirmed(true)
-          toast.info('Proceeding with minting . . .')
           executeMinting()
         }
       } else if (commitTxHash) {
         const confirmations = await getConfirmations(commitTxHash)
         setCommitConfirmations(confirmations)
+        setRemainingCommitConfirmations(
+          Math.max(0, commitConfirmationsThreshold - confirmations)
+        )
       }
     } catch (error) {
       toast.error('Error updating the status of the etching process')
     }
-  }, [
-    revealTxHash,
-    commitTxHash,
-    setEtchedFinished,
-    etchedConfirmed,
-    executeMinting,
-  ])
+  }, [])
 
   const executeRevealTxHash = useCallback(async () => {
     try {
@@ -162,7 +176,7 @@ export default function EtchingProgress({
     setProgress(
       Math.round((commitConfirmations / commitConfirmationsThreshold) * 100)
     )
-    if (commitConfirmations >= commitConfirmationsThreshold) {
+    if (!remainingCommitConfirmations) {
       executeRevealTxHash()
     }
   }, [commitConfirmations, executeRevealTxHash])
@@ -170,19 +184,16 @@ export default function EtchingProgress({
   const goToUrl = (url: string) => {
     window.open(url, '_blank')
   }
-  const newRune = () => {}
+
   return (
     <Card>
       <CardHeader className="space-x-20 w-50">
         <CardTitle>{name}</CardTitle>
-        <CardDescription className="text-left w-100">
-          Information about the rune: {name}.
-        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="name">From</Label>
+            <Label htmlFor="name">Owner</Label>
             <p className="text-lg font-medium">{formatAddress(receiver!)}</p>
           </div>
           <div className="space-y-2">
@@ -191,17 +202,14 @@ export default function EtchingProgress({
           </div>
         </div>
         <div className="space-y-2">
-          <Label>Step 1. Etching Progress</Label>
+          <Label>Step 1. Commit transaction maturation</Label>
           <Progress className="w-full" value={progress} />
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {revealTxHash
               ? etchedFinished
                 ? 'Etching process has been confirmed successfully, proceeding with minting . . .'
-                : 'The Etching process has been completed, waiting for confirmation . . .'
-              : `The Etching progress is currently at ${progress > 100 ? 100 : progress}%. (6 confirmations are needed)`}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {' Check status of your TX on'}
+                : `Commit transaction reached ${commitConfirmationsThreshold} confirmations, now waiting for the reveal transaction to be confirmed`
+              : `(${remainingCommitConfirmations} confirmation${remainingCommitConfirmations > 1 ? 's' : ''} remaining)`}
           </p>
           {!etchedFinished && (
             <p
@@ -214,9 +222,7 @@ export default function EtchingProgress({
                 )
               }
             >
-              {`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${
-                revealTxHash ? `${revealTxHash}` : `${commitTxHash}`
-              }`}
+              {`Follow ${revealTxHash ? 'reveal transaction' : 'commit transaction'} on Bitcoin explorer`}
             </p>
           )}
         </div>
@@ -226,43 +232,21 @@ export default function EtchingProgress({
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {"Creating your rune's token in the Rootstock network"}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {`Minting status is --${txStatus ?? 'starting'}--`}
-            </p>
-            {txHash && txStatus !== 'success' && (
+            <p className="text-sm text-gray-500 dark:text-gray-400"></p>
+            {mintTxHash && !mintFinished && (
               <Fragment>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {' Check status of your minting on RSK'}
+                  {'Waiting for minting transaction to be confirmed.'}
                 </p>
                 <p
                   className="text-sm text-blue-600 dark:text-gray-400 cursor-pointer"
                   onClick={() =>
                     goToUrl(
-                      `${process.env.NEXT_PUBLIC_RSK_EXPLORER_URL}/${txHash}`
+                      `${process.env.NEXT_PUBLIC_RSK_EXPLORER_URL}/${mintTxHash}`
                     )
                   }
                 >
-                  {`${process.env.NEXT_PUBLIC_RSK_EXPLORER_URL}/${txHash}`}
-                </p>
-              </Fragment>
-            )}
-            {txStatus === 'success' && (
-              <Fragment>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {'Your rune has been minted successfully'}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {' Check TX of your minting on RSK'}
-                </p>
-                <p
-                  className="text-sm text-blue-600 dark:text-gray-400 cursor-pointer"
-                  onClick={() =>
-                    goToUrl(
-                      `${process.env.NEXT_PUBLIC_RSK_EXPLORER_URL}/${txHash}`
-                    )
-                  }
-                >
-                  {`${process.env.NEXT_PUBLIC_RSK_EXPLORER_URL}/${txHash}`}
+                  {'Follow minting transaction on Rootstock explorer'}
                 </p>
               </Fragment>
             )}
@@ -270,23 +254,13 @@ export default function EtchingProgress({
         )}
       </CardContent>
       <CardFooter className="relative z-0 justify-end p-6">
-        {txStatus === 'success' ? (
-          <Button
-            className="mt-5 bg-white text-black"
-            type="submit"
-            onClick={newRune}
-          >
-            {'Create a new rune'}
-          </Button>
-        ) : (
-          <Button
-            className="mt-5 bg-white text-black"
-            type="submit"
-            disabled={true}
-          >
-            {etchedFinished ? 'Minting tokens on RSK' : 'Etching Rune ...'}
-          </Button>
-        )}
+        <Button
+          className="mt-5 bg-white text-black"
+          type="submit"
+          disabled={true}
+        >
+          {etchedFinished ? 'Minting tokens on RSK' : 'Etching Rune ...'}
+        </Button>
       </CardFooter>
     </Card>
   )

@@ -1,5 +1,6 @@
 // app/api/etch-rune/route.ts
 import { NextRequest, NextResponse } from 'next/server'
+import axios from 'axios'
 import {
   commitTx,
   revealTx,
@@ -25,16 +26,20 @@ export async function POST(request: NextRequest) {
       divisibility,
       tapLeafScript,
     } = data
-    const deserializedTapLeafScript = tapLeafScript.map((item: any) => ({
+    const deserializedTapLeafScript = tapLeafScript?.map((item: any) => ({
       controlBlock: Buffer.from(item.controlBlock, 'base64'),
       leafVersion: item.leafVersion,
       script: Buffer.from(item.script, 'base64'),
     }))
 
+    const {
+      data: { 1: feePerVByte },
+    } = await axios.get('https://blockstream.info/testnet/api/fee-estimates')
+
     const initVariables = {
       taprootAddress: process.env.NEXT_PUBLIC_TAPROOT_ADDRESS ?? '',
       wif: process.env.NEXT_PUBLIC_WIF ?? '',
-      feePerVByte: 120,
+      feePerVByte: Math.ceil(feePerVByte),
     }
     console.log('initVariables:', initVariables)
 
