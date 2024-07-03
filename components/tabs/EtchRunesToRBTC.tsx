@@ -371,9 +371,8 @@ export default function EtchRunesToRBTC(): JSX.Element {
             )}
             <CardFooter className="px-0 relative z-0 justify-end">
               <Button
-                className="mt-5 bg-white text-black before:w-[120px]"
+                className="mt-5 bg-white text-black"
                 type="submit"
-                variant={'outline'}
                 disabled={loading}
               >
                 {loading ? 'Loading Tx' : 'Runes to BTC'}

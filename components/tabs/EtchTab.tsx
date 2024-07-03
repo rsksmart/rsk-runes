@@ -133,7 +133,7 @@ export default function EtchTab({
                         className="sr-only"
                         onChange={(e) => setIsNft(Boolean(e.target.checked))}
                       />
-                      <span className="w-11 h-6 bg-card rounded-full border border-input toggle-bg"></span>
+                      <span className="w-11 h-6 bg-card rounded-full border border-input toggle-bg cursor-not-allowed"></span>
                     </label>
                   </div>
                 </FormControl>
@@ -195,9 +195,8 @@ export default function EtchTab({
               />
               <CardFooter className="px-0 relative z-0 justify-end">
                 <Button
-                  className="mt-5 bg-white text-black before:w-[104px]"
+                  className="mt-5 bg-white text-black"
                   type="submit"
-                  variant={'outline'}
                   disabled={loading}
                 >
                   {loading ? 'Loading' : 'Etch Token'}

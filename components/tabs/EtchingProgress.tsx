@@ -203,7 +203,7 @@ export default function EtchingProgress({
         <div className="space-y-2">
           <Label>Step 1. Commit transaction maturation</Label>
           <Progress className="w-full" value={progress} />
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-500 dark:text-gray-400 pt-1">
             {revealTxHash
               ? etchedFinished
                 ? 'Etching process has been confirmed successfully, proceeding with minting . . .'
@@ -212,7 +212,7 @@ export default function EtchingProgress({
           </p>
           {!etchedFinished && (
             <p
-              className="text-sm text-blue-600 dark:text-gray-400 cursor-pointer"
+              className="text-sm text-white underline cursor-pointer"
               onClick={() =>
                 goToUrl(
                   `${process.env.NEXT_PUBLIC_EXPLORER_URL}/${
@@ -238,7 +238,7 @@ export default function EtchingProgress({
                   {'Waiting for minting transaction to be confirmed.'}
                 </p>
                 <p
-                  className="text-sm text-blue-600 dark:text-gray-400 cursor-pointer"
+                  className="text-sm text-white underline cursor-pointer"
                   onClick={() =>
                     goToUrl(
                       `${process.env.NEXT_PUBLIC_RSK_EXPLORER_URL}/${mintTxHash}`

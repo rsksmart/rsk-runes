@@ -41,8 +41,7 @@ export default function MintTab(): JSX.Element {
       </CardContent>
       <CardFooter className="flex justify-end p-6 relative z-0">
         <Button
-          className="before:w-[152px] bg-white text-black"
-          variant={'outline'}
+          className="bg-white text-black"
         >
           Create Mint Token
         </Button>
