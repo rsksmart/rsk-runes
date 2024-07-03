@@ -50,7 +50,7 @@ export default function EtchingProgress({
 }: Props): JSX.Element {
   const [commitConfirmations, setCommitConfirmations] = useState(0)
 
-  const commitConfirmationsThreshold = 3
+  const commitConfirmationsThreshold = 6
   const [remainingCommitConfirmations, setRemainingCommitConfirmations] =
     useState(commitConfirmationsThreshold)
 

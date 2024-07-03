@@ -52,6 +52,8 @@ export async function GET(request: NextRequest) {
             { status: 400 }
           )
         }
+        console.log('runeName:', runeName)
+
         const runeId = await getRuneIdByName(runeName)
         console.log('runeId:', runeId)
 
