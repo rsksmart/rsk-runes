@@ -51,8 +51,6 @@ The Runes Mock Bridge consists of two main processes:
 ├── components.json
 ├── constants
 │   └── index.ts
-├── functions
-│   └── index.ts
 ├── lib
 │   └── utils.ts
 ├── package.json

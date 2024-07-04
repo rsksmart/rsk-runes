@@ -1,15 +1,9 @@
 'use client'
-
 import Footer from '@/components/Footer'
 import Navbar from '@/components/navbar/Navbar'
 import ConnectWalletButton from '@/components/ui/ConnectWalletButton'
-import { mint } from '@/functions'
 
 export default function Home() {
-  const onMint = async () => {
-    await mint()
-  }
-
   return (
     <main className="flex relative h-full w-full flex-col items-center">
       <Navbar />

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import BaseDialog from './BaseDialog'
 import MetamaskIcon from '@/components/icons/MetamaskIcon'
 import useConnectWallet from '@/app/utils/hooks/useConnectWallet'

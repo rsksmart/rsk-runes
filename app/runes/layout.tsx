@@ -2,7 +2,6 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/app/context/AuthContext'
-import TabsSection from '@/components/tabs'
 import Navbar from '@/components/navbar/Navbar'
 import Footer from '@/components/Footer'
 

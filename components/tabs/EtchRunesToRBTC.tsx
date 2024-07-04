@@ -1,5 +1,5 @@
 'use client'
-import { FormEvent, Fragment, useCallback, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
@@ -7,7 +7,6 @@ import { Label } from '../ui/label'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -27,16 +26,13 @@ import {
   FormControl,
   FormMessage,
 } from '@/components/ui/form'
-import { CustomInput } from './CustomInput'
-import { FormData, FormDataRuneToBTC } from '@/app/utils/types'
+import { FormDataRuneToBTC } from '@/app/utils/types'
 import { formSchemaRuneToBTC } from '@/app/utils/schemas'
 import { useAuth } from '@/app/context/AuthContext'
 import InputField from '../ui/InputField'
 import { FreezeTxData, useRuneERC1155 } from '@/app/utils/hooks/useRuneERC1155'
 import { toast } from 'react-toastify'
 import {
-  getRuneIdByName,
-  transferTx,
   isConfirmed,
   //@ts-ignore
 } from 'bc-runes-js'
