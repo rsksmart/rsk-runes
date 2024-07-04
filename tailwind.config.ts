@@ -19,6 +19,10 @@ const config = {
     },
     extend: {
       colors: {
+        'custom-green': '#79c600',
+        'custom-pink': '#ff71e1',
+        'custom-lime': '#deff1a',
+        'custom-cyan': '#08ffd0',
         title: 'hsl(var(--title))',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
