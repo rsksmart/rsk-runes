@@ -12,9 +12,13 @@ export default function Home() {
         <div className="w-full relative">
           <h1 className="md:text-6xl xl:text-[78px] relative z-10 font-bold text-black flex flex-col gap-2.5">
             <span className="max-w-max px-1.5 bg-white">Runestock</span>
-            <span className='flex gap-2'>
-              <span className="bg-custom-green px-1.5 w-max xl:text-5xl">Runes</span>
-              <span className="bg-title px-1.5 w-max xl:text-5xl">on Rootstock</span>
+            <span className="flex gap-2">
+              <span className="bg-custom-green px-1.5 w-max xl:text-5xl">
+                Runes
+              </span>
+              <span className="bg-title px-1.5 w-max xl:text-5xl">
+                on Rootstock
+              </span>
             </span>
           </h1>
           <BtcIcon className="absolute right-0 top-0 md:w-[170px] xl:w-[200px] z-0" />
