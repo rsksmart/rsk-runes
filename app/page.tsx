@@ -6,21 +6,20 @@ import ConnectWalletButton from '@/components/ui/ConnectWalletButton'
 
 export default function Home() {
   return (
-    <main className="flex relative h-full w-full flex-col items-center">
+    <main className="h-full w-full flex flex-col">
       <Navbar />
-      <section className="w-full h-full md:w-[1000px] xl:w-[1300px] m-auto mt-4">
+      <section className="w-full px-6 xl:px-0 md:w-[1000px] xl:w-[1300px] m-auto mt-4">
         <div className="w-full relative">
-          <h1 className="md:text-6xl xl:text-[78px] relative z-10 font-bold text-center text-black flex gap-2.5 items-center">
+          <h1 className="md:text-6xl xl:text-[78px] relative z-10 font-bold text-black flex flex-col gap-2.5">
             <span className="max-w-max px-1.5 bg-white">Runestock</span>
-            <span className="bg-custom-green px-1.5">Runes</span>
-            <span className="bg-title px-1.5">on Rootstock</span>
+            <span className='flex gap-2'>
+              <span className="bg-custom-green px-1.5 w-max xl:text-5xl">Runes</span>
+              <span className="bg-title px-1.5 w-max xl:text-5xl">on Rootstock</span>
+            </span>
           </h1>
           <BtcIcon className="absolute right-0 top-0 md:w-[170px] xl:w-[200px] z-0" />
         </div>
         <div className="mt-10">
-          <span className="bg-custom-cyan text-lg flex w-8 h-8 justify-center items-center font-semibold rounded-full text-black">
-            1.
-          </span>
           <h1 className="text-4xl text-white font-semibold mt-4 mb-2">
             Go to the app
           </h1>
@@ -28,7 +27,7 @@ export default function Home() {
             <ConnectWalletButton />
           </div>
         </div>
-        <div className="mt-10 flex gap-3">
+        <div className="flex gap-3">
           <div className="flex-1 mt-4 border border-white rounded-3xl p-4">
             <div className="flex gap-2">
               <h3 className="bg-custom-lime w-max text-black text-3xl font-semibold px-2 py-1">
