@@ -1,47 +1,73 @@
-import { TabsTrigger, TabsList, Tabs } from '@/components/ui/tabs'
+'use client'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
 import EtchTab from '@/components/tabs/EtchTab'
-import MintTab from '@/components/tabs/MintTab'
-import { ethers } from 'ethers'
-import { useRuneERC20 } from '@/app/utils/hooks/useRuneERC20'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import EtchingProgress from '@/components/tabs/EtchingProgress'
+import { UseRuneERC1155Props } from '@/app/utils/hooks/useRuneERC1155'
+import RunesList from './RunesList'
 
 export default function TabsSection() {
-  const {
-    tokenAddress,
-    getTokenAddress,
-    createRune,
-    loadingCreateRune,
-    txStatus, //posible states are: 'pending', 'success', 'error'
-    createReceipt, //TX receipt for the createRune transaction
-  } = useRuneERC20({
-    name: 'Rune', //TODO replace with correct value
-    symbol: 'RUNE', //TODO replace with correct value
-    initialSupply: ethers.parseUnits('1000', 18), //TODO replace with correct value
-    initialOwner: '0x98F029c802dA9542c8BdE8FEc9587609371f6582', //TODO replace with correct address
-    runeID: '1', //TODO replace with correct runeID
-    _mintAmount: ethers.parseUnits('1', 18), //TODO replace with correct value
-    _maxSupply: ethers.parseUnits('10000', 18), //TODO replace with correct value
-  })
+  const [runePropsState, setRunePropsState] = useState<UseRuneERC1155Props>({
+    name: '',
+    symbol: '',
+    premine: 0,
+    amount: 0,
+    cap: 0,
+    divisibility: 0,
+    receiver: '',
+  } as UseRuneERC1155Props)
+  const [commitTxHash, setCommitTxHash] = useState<string | null>(null)
+  const [revealTxHash, setRevealTxHash] = useState<string | null>(null)
+  const [mintTxHash, setMintTxHash] = useState<string | null>(null)
+  const [etchedFinished, setEtchedFinished] = useState(false)
+  const [mintFinished, setMintFinished] = useState(false)
+
   useEffect(() => {
-    console.log('loadingCreateRune:', loadingCreateRune)
-    console.log('txStatus:', txStatus)
-    console.log('createReceipt:', createReceipt)
-  }, [loadingCreateRune, txStatus, createReceipt])
+    const mintTxHash = localStorage.getItem('mintTxHash')
+    console.log('mintTxHash:', mintTxHash)
+    if (mintTxHash) {
+      setMintTxHash(mintTxHash)
+    }
+
+    const { revealTxHash, commitTxHash, runeProps } = JSON.parse(
+      localStorage.getItem('runeData') || '{}'
+    )
+
+    if (runeProps) {
+      setRunePropsState(runeProps)
+      setRevealTxHash(revealTxHash ?? null)
+      setCommitTxHash(commitTxHash ?? null)
+    }
+  }, [])
 
   return (
-    <Tabs className="w-full max-w-2xl" defaultValue="etch">
-      <TabsList className="grid grid-cols-2 w-full">
-        <TabsTrigger value="etch">Etch</TabsTrigger>
-        <TabsTrigger value="mint">Mint</TabsTrigger>
-      </TabsList>
-      <EtchTab />
-      <MintTab />
-      <div>
-        <h1>Runes</h1>
-        <button onClick={getTokenAddress}>Get Token Address</button>
-        <button onClick={createRune}>Create Rune</button>
-        {tokenAddress && <p>Token Address: {tokenAddress}</p>}
-      </div>
+    <Tabs
+      className="w-full max-w-2xl flex flex-col items-center"
+      defaultValue="etch"
+    >
+      <TabsContent value="etch" className="w-full">
+        {!commitTxHash ? (
+          <EtchTab
+            setRuneProps={setRunePropsState}
+            setCommitTxHash={setCommitTxHash}
+          />
+        ) : (
+          <EtchingProgress
+            mintTxHash={mintTxHash}
+            setMintTxHash={setMintTxHash}
+            mintFinished={mintFinished}
+            setMintFinished={setMintFinished}
+            runeProps={runePropsState}
+            commitTxHash={commitTxHash}
+            setCommitTxHash={setCommitTxHash}
+            setRevealTxHash={setRevealTxHash}
+            revealTxHash={revealTxHash}
+            etchedFinished={etchedFinished}
+            setEtchedFinished={setEtchedFinished}
+          />
+        )}
+        {!commitTxHash && <RunesList />}
+      </TabsContent>
     </Tabs>
   )
 }

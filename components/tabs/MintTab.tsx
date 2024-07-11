@@ -9,41 +9,39 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { TabsContent } from '@/components/ui/tabs'
 
 export default function MintTab(): JSX.Element {
   return (
-    <TabsContent value="mint">
-      <Card>
-        <CardHeader>
-          <CardTitle>Mint</CardTitle>
-          <CardDescription>Mint a rune.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+    <Card>
+      <CardHeader>
+        <CardTitle>Mint</CardTitle>
+        <CardDescription>Mint a rune.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <section className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
-              <Input
-                className="w-[300px]"
-                id="name"
-                placeholder="Enter token name"
-              />
+              <Input id="name" placeholder="Enter rune name" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="amount">Amount</Label>
               <Input
-                className="w-[300px]"
                 id="amount"
-                placeholder="Enter token amount"
+                placeholder="Enter mint repeats"
                 type="number"
               />
             </div>
           </div>
-        </CardContent>
-        <CardFooter>
-          <Button>Create Mint Token</Button>
-        </CardFooter>
-      </Card>
-    </TabsContent>
+          <div className="w-full space-y-2">
+            <Label htmlFor="address">Rootstock Address</Label>
+            <Input id="address" placeholder="Enter your RSK address" />
+          </div>
+        </section>
+      </CardContent>
+      <CardFooter className="flex justify-end p-6 relative z-0">
+        <Button className="bg-white text-black">Create Mint Token</Button>
+      </CardFooter>
+    </Card>
   )
 }
