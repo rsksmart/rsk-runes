@@ -24,7 +24,6 @@ export default function TabsSection() {
 
   useEffect(() => {
     const mintTxHash = localStorage.getItem('mintTxHash')
-    console.log('mintTxHash:', mintTxHash)
     if (mintTxHash) {
       setMintTxHash(mintTxHash)
     }

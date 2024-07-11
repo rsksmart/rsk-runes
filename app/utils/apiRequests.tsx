@@ -4,7 +4,6 @@ export const getRequest = async (url: string) => {
     const json = await response.json()
     return json
   } catch (error) {
-    console.log('Error on getRequest:', error)
     return { error: 'Internal Server Error' }
   }
 }
@@ -20,7 +19,6 @@ export const postRequest = async (url: string, data: any) => {
     const json = await response.json()
     return json
   } catch (error) {
-    console.log('Error on commitTx:', error)
     return { error: 'Internal Server Error' }
   }
 }

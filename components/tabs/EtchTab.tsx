@@ -60,7 +60,6 @@ export default function EtchTab({
     try {
       setLoading(true)
 
-      console.log('Etching rune:', data.name)
       const response = await getRequest(
         `/api/etch-rune?name=${data.name}&action=getByname`
       )
@@ -80,11 +79,7 @@ export default function EtchTab({
         name: data.name,
         action: 'commitTx',
       })
-      console.log('commitData', commitData)
       const { commitTxHash, scriptP2trAddress, tapLeafScript } = commitData
-      console.log('committxhash after commit:', commitTxHash)
-      console.log('scriptP2trAddress after commit:', scriptP2trAddress)
-      console.log('tapLeafScript after commit:', tapLeafScript)
       setCommitTxHash(commitTxHash)
       localStorage.setItem(
         'runeData',

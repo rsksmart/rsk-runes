@@ -10,7 +10,6 @@ import {
 
 export async function POST(request: NextRequest) {
   const data = await request.json()
-  console.log('data in post request is ', data)
   try {
     const { action, amount, to, runeId } = data
     const taprootAddress = process.env.NEXT_PUBLIC_TAPROOT_ADDRESS
@@ -20,19 +19,15 @@ export async function POST(request: NextRequest) {
       wif,
       feePerVByte: 120,
     }
-    console.log('initVariables:', initVariables)
     init(initVariables)
-    console.log('Initiated correctly')
     switch (action) {
       case 'transferRune':
-        console.log('transferRune:', amount, to, runeId)
         const txHash = await transferTx([{ amount, to, runeId }])
         return NextResponse.json({ txHash })
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.log('Error on submit:', error)
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }
@@ -52,11 +47,7 @@ export async function GET(request: NextRequest) {
             { status: 400 }
           )
         }
-        console.log('runeName:', runeName)
-
         const runeId = await getRuneIdByName(runeName)
-        console.log('runeId:', runeId)
-
         return NextResponse.json({ runeId })
       case 'getConfirmations':
         const txHash = searchParams.get('txHash')
@@ -72,7 +63,6 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.log('Error on getByname:', error)
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }

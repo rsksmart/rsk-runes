@@ -33,7 +33,6 @@ function ConnectWalletDialog({ closeDialog, open }: props) {
       }, 1500)
     } catch (error: any) {
       setIsError(true)
-      console.log('error: ', error)
     }
   }
 
