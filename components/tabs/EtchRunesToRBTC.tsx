@@ -63,16 +63,9 @@ export default function EtchRunesToRBTC(): JSX.Element {
     const runeToBTCDataParsed: FreezeTxData = runeToBTCData
       ? JSON.parse(runeToBTCData)
       : null
-    console.log('runeToBTCDataParsed is: ', runeToBTCDataParsed)
 
     if (runeToBTCDataParsed) {
       //if the freeze process is already done
-      // setFreezeTxData(runeToBTCDataParsed)
-      console.log(
-        'transferrunetxhash is in beggining: ',
-        runeToBTCDataParsed.transferRuneTxHash
-      )
-
       if (runeToBTCDataParsed.transferRuneTxHash) {
         //if the transfer of the rune in btc is already in process
         setLoading(true)
@@ -92,20 +85,17 @@ export default function EtchRunesToRBTC(): JSX.Element {
       setLoading(true)
     } else {
       //if there is not freeze on rsk process yet
-      console.log('runeToBTC: ', runeToBTC)
       form.reset(runeToBTC)
     }
   }, [])
 
   const onSubmit = (data: FormDataRuneToBTC) => {
-    console.log('Form data submitted: ', data)
     processRSKFreeze(data)
   }
   const processRSKFreeze = async (data: FormDataRuneToBTC) => {
     setLoading(true)
     try {
       const freezeTxHash = await freezeNonFungible(data.name)
-      console.log('freezeTxHash: ', freezeTxHash)
       const runeToBTCData: FreezeTxData = {
         runeName: data.name,
         amount: parseInt(data.amount),
@@ -122,10 +112,7 @@ export default function EtchRunesToRBTC(): JSX.Element {
   }
   const processBTCRuneSend = async (runeToBTCDataParsed: FreezeTxData) => {
     try {
-      console.log('entering to processBTCRuneSend')
-
       setProcessingRuneTransfer(true)
-      console.log('runename is: ', runeToBTCDataParsed.runeName)
       if (!runeToBTCDataParsed.runeName) {
         console.error('No runeName found')
         toast.error('No runeName found')
@@ -135,16 +122,13 @@ export default function EtchRunesToRBTC(): JSX.Element {
       const response = await getRequest(
         `/api/transfer-rune?name=${runeToBTCDataParsed.runeName}&action=getIdByName`
       )
-      console.log('runeId is: ', response.runeId)
       const runeId = response.runeId
-      console.log('receiver is ', runeToBTCDataParsed.receiver)
 
       if (!runeId) {
         console.error('No recipient address or rune id')
         toast.error('No recipient address or rune id found')
         return
       }
-      console.log('process data is: ', runeToBTCDataParsed)
       if (!runeToBTCDataParsed) {
         console.error('No process found')
         toast.error('No process data found')
@@ -161,21 +145,13 @@ export default function EtchRunesToRBTC(): JSX.Element {
         to: runeToBTCDataParsed.receiver,
         runeId,
       })
-      console.log('transferRuneTxHash: ', transferRuneTxHash)
-      console.log(
-        'transferRuneTxHash.txHash.txHash: ',
-        transferRuneTxHash?.txHash?.txHash
-      )
       const hash = transferRuneTxHash?.txHash?.txHash
-      console.log('hash is: ', hash)
       const newRuneToBTCData = {
         ...runeToBTCDataParsed,
         transferRuneTxHash: hash,
       }
       setTransferTxHash(hash)
-      console.log('newRuneToBTCData is: ', newRuneToBTCData)
       localStorage.setItem('runeToBTCData', JSON.stringify(newRuneToBTCData))
-      console.log('transferred rune to BTC')
       setTransferWaiting(true)
       toast.success('Rune transfer tx created, waiting for confirmation on BTC')
     } catch (error) {
@@ -185,40 +161,28 @@ export default function EtchRunesToRBTC(): JSX.Element {
   }
   const updateStatus = useCallback(async () => {
     try {
-      console.log('updating status')
       const runeToBTCData = localStorage.getItem('runeToBTCData')
       const runeToBTCDataParsed: FreezeTxData = runeToBTCData
         ? JSON.parse(runeToBTCData)
         : null
-      console.log('status data inside updatestatus is: ', runeToBTCDataParsed)
       if (!runeToBTCDataParsed) return
-      console.log(
-        'transferruneTxHash in update status: ',
-        runeToBTCDataParsed.transferRuneTxHash
-      )
-      console.log('transferWaiting in update status: ', transferWaiting)
-
       if (!transferWaiting || !runeToBTCDataParsed.transferRuneTxHash) return
       setTransferTxHash(runeToBTCDataParsed.transferRuneTxHash)
       const confirmed = await isConfirmed(
         runeToBTCDataParsed.transferRuneTxHash
       )
-      console.log('is confirmed: ', confirmed)
       if (confirmed) {
-        console.log('Rune transfer to BTC has been confirmed')
         toast.success('Rune transfer to BTC has been confirmed')
         setProcessFinished(true)
-        // form.reset()
-        // form.setValue('amount', '0')
-        // resetProcess()
+        form.reset()
+        form.setValue('amount', '0')
+        resetProcess()
       }
     } catch (error) {
-      console.log('Error updating status: ', error)
       toast.error('Error reading process status, please refresh the page.')
     }
   }, [])
   const resetProcess = () => {
-    console.log('resetting process')
     setTransferWaiting(false)
     setProcessingRuneTransfer(false)
     setLoading(false)

@@ -13,8 +13,6 @@ import {
 
 export async function POST(request: NextRequest) {
   const data = await request.json()
-  console.log('data in post request is ', data)
-
   try {
     const {
       action,
@@ -41,19 +39,11 @@ export async function POST(request: NextRequest) {
       wif: process.env.NEXT_PUBLIC_WIF ?? '',
       feePerVByte: Math.ceil(feePerVByte),
     }
-    console.log('initVariables:', initVariables)
-
     init(initVariables)
-    console.log('Initiated correctly')
-
     switch (action) {
       case 'commitTx':
-        console.log('commitTx:', name)
         const commitData = await commitTx({ name })
         const { commitTxHash, scriptP2trAddress, tapLeafScript } = commitData
-        console.log('committxhash:', commitTxHash)
-        console.log('scriptP2trAddress:', scriptP2trAddress)
-        console.log('tapLeafScript:', tapLeafScript)
         return NextResponse.json({
           commitTxHash,
           scriptP2trAddress,
@@ -64,8 +54,6 @@ export async function POST(request: NextRequest) {
           data.scriptP2trAddress,
           data.commitTxHash
         )
-        console.log('commitUtxo:', commitUtxo)
-        console.log(data)
         commitUtxo.tapLeafScript = deserializedTapLeafScript
         const { revealTxHash } = await revealTx({
           commitUtxo,
@@ -81,7 +69,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.log('Error on submit:', error)
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }
@@ -95,7 +82,6 @@ export async function GET(request: NextRequest) {
     switch (action) {
       case 'getByname':
         const name = searchParams.get('name')
-        console.log('name in the GET request:', name)
         if (!name) {
           return NextResponse.json(
             { error: 'Name query parameter is required' },
@@ -128,7 +114,6 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.log('Error on getByname:', error)
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }

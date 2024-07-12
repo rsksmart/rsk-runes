@@ -77,7 +77,6 @@ export default function EtchingProgress({
       localStorage.setItem('mintTxHash', hash)
       setMintTxHash(hash)
     } catch (error) {
-      console.log(error)
       toast.error('Error minting the rune')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

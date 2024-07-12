@@ -2,7 +2,7 @@
 
 # Runes Mock Bridge
 
-This project is an open-source proof of concept implementing a Runes Mock Bridge. The primary goal is to allow users to etch (and eventually mint) Runes on the Bitcoin network and create a 1:1 representation of these Runes as ERC20 tokens on the Rootstock (RSK) network.
+This project is an open-source proof of concept implementing a Runes Mock Bridge. The primary goal is to allow users to etch (and eventually mint) Runes on the Bitcoin network and create a 1:1 representation of these Runes as ERC1155 tokens (Non fungible initially) on the Rootstock (RSK) network, manage the runes in the RSK network, and then take it back to BTC.
 
 ## Table of Contents
 
@@ -17,44 +17,24 @@ This project is an open-source proof of concept implementing a Runes Mock Bridge
 
 ## Overview
 
-The Runes Mock Bridge consists of two main processes:
+The Runes Mock Bridge consists of various processes:
 
 1. **Etching Runes on Bitcoin**: Users can etch Runes containing data entered through a form. A signer instantiated on Rootstock signs the transaction, creating the Rune without the user needing to sign any transactions directly.
-2. **Creating ERC20 Representation on RSK**: Once a Rune is etched on Bitcoin, the system calls an ERC20 Factory to deploy an ERC20 token contract on RSK. The token's information is based on the user's input for the Rune. The user receives the specified amount of tokens in a "premine" specified during the Rune creation.
+2. **Creating ERC1155 Representation on RSK**: Once a Rune is etched on Bitcoin, the system calls an ERC1155 function to mint the Rune on the RSK network. The token's information is based on the user's input for the Rune. The user receives the specified amount of tokens in a "premine" specified during the Rune creation.
+3. **Transfer, manage, and interact with RSK runes representation** : Users can transfer, manage, and interact with the ERC1155 representation of the Rune on the RSK network.
+4. **Redeeming Runes**: Users can redeem the ERC1155 tokens on RSK to etch the Rune back on Bitcoin. The system freezes the ERC1155 tokens and sends the Rune back to the user's Bitcoin address.
+
+## Project Structure
+
+![Descripción de la imagen](public/Arch.png)
 
 ## Technologies Used
 
-- **Runelib**: [Runelib GitHub](https://github.com/sCrypt-Inc/runelib)
-- **BitcoinJS**: [BitcoinJS GitHub](https://github.com/bitcoinjs/bitcoinjs-lib)
+- **Bc-runes-js**: [Bc-runes-js Package](https://www.npmjs.com/package/bc-runes-js)
 - **Hardhat**: [Hardhat Documentation](https://hardhat.org/docs)
 - **OpenZeppelin Standards**: [OpenZeppelin](https://www.openzeppelin.com/)
 - **ShadCN**: [ShadCN Documentation](https://ui.shadcn.com/docs)
 - **Ethers.js**: [Ethers.js Documentation](https://docs.ethers.org/v5/)
-
-## Project Structure
-
-```
-├── app
-│   ├── layout.tsx
-│   ├── page.tsx
-│   └── utils
-│       ├── abi
-│       └── hooks
-│           └── useRuneERC20.tsx
-├── components
-│   ├── tabs
-│   │   ├── EtchTab.tsx
-│   │   ├── index.tsx
-│   │   ├── LastEtchTab.tsx
-│   │   └── MintTab.tsx
-│   └── ui
-├── components.json
-├── constants
-│   └── index.ts
-├── lib
-│   └── utils.ts
-├── package.json
-```
 
 ## Installation
 
@@ -71,6 +51,8 @@ To clone and run this project locally, follow these steps:
 
    ```sh
    yarn
+   or
+   npm install
    ```
 
 3. **Configure environment variables**:
@@ -79,23 +61,33 @@ To clone and run this project locally, follow these steps:
    ```sh
    RSK_PROVIDER_URL="https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID"
    PRIVATE_KEY="your-private-key"
+   NEXT_PUBLIC_APP_PK='your-private-key'
+   NEXT_PUBLIC_RPC_URL='your rsk rpc url'
+   NEXT_PUBLIC_EXPLORER_URL=https://blockstream.info/testnet/tx
+   NEXT_PUBLIC_RSK_EXPLORER_URL=https://explorer.testnet.rootstock.io/tx
+   NEXT_PUBLIC_CONTRACT_ADDRESS='your erc1155 contract address'
+   NEXT_PUBLIC_TAPROOT_ADDRESS='your taproot address'
+   NEXT_PUBLIC_WIF='your wif key'
    ```
 
 4. **Run the development server**:
 
    ```sh
    yarn dev
+   or
+   npm run dev
    ```
 
 ## Usage
 
 1. **Access the application**: Open [http://localhost:3000](http://localhost:3000) in your browser.
 2. **Etch a Rune**: Navigate to the Etch tab, fill out the form, and submit to etch a Rune on Bitcoin.
-3. **View ERC20 Representation**: After etching, view the deployed ERC20 token details on the Last Etch tab.
+3. **View ERC20 Representation**: After etching, view the ERC1155 token details on the Last Etch tab.
 
 ## Future Development
 
 - **Minting Runes**: The minting functionality is under development and will be available in future releases.
+- **Fungible Tokens on RSK**: The project will support the creation of fungible tokens on the RSK network.
 
 ## Contributing
 
