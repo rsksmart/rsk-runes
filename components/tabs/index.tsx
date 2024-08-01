@@ -13,7 +13,6 @@ export default function TabsSection() {
     premine: 0,
     amount: 0,
     cap: 0,
-    divisibility: 0,
     receiver: '',
   } as UseRuneERC1155Props)
   const [commitTxHash, setCommitTxHash] = useState<string | null>(null)
@@ -21,6 +20,7 @@ export default function TabsSection() {
   const [mintTxHash, setMintTxHash] = useState<string | null>(null)
   const [etchedFinished, setEtchedFinished] = useState(false)
   const [mintFinished, setMintFinished] = useState(false)
+  const [isNft, setIsNft] = useState<boolean>(true)
 
   useEffect(() => {
     const mintTxHash = localStorage.getItem('mintTxHash')
@@ -49,6 +49,8 @@ export default function TabsSection() {
           <EtchTab
             setRuneProps={setRunePropsState}
             setCommitTxHash={setCommitTxHash}
+            isNft={isNft}
+            setIsNft={setIsNft}
           />
         ) : (
           <EtchingProgress

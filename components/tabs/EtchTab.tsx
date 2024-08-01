@@ -29,6 +29,8 @@ import { useAuth } from '@/app/context/AuthContext'
 export default function EtchTab({
   setRuneProps,
   setCommitTxHash,
+  isNft,
+  setIsNft,
 }: EtchTabProps): JSX.Element {
   const [loading, setLoading] = useState(false)
   const form = useForm<UseRuneERC1155Props>({
@@ -39,18 +41,19 @@ export default function EtchTab({
       premine: 1,
       amount: 1,
       cap: 0,
-      divisibility: 0,
       receiver: '',
     },
   })
   const { address: walletAddress } = useAuth()
 
-  const [isNft, setIsNft] = useState<boolean>(true)
-
   const onSubmit = (data: UseRuneERC1155Props) => {
-    setRuneProps(data)
-    localStorage.setItem('runeData', JSON.stringify({ runeProps: data }))
-    handleEtch(data)
+    const runesPropsData = { ...data, isNft }
+    setRuneProps(runesPropsData)
+    localStorage.setItem(
+      'runeData',
+      JSON.stringify({ runeProps: runesPropsData })
+    )
+    handleEtch(runesPropsData)
   }
 
   useEffect(() => {
@@ -122,13 +125,12 @@ export default function EtchTab({
                   <div className="flex gap-2">
                     <label className="flex relative items-center cursor-pointer">
                       <input
-                        disabled
                         checked={isNft}
                         type="checkbox"
                         className="sr-only"
                         onChange={(e) => setIsNft(Boolean(e.target.checked))}
                       />
-                      <span className="w-11 h-6 bg-card rounded-full border border-input toggle-bg cursor-not-allowed"></span>
+                      <span className="w-11 h-6 bg-card rounded-full border border-input toggle-bg"></span>
                     </label>
                   </div>
                 </FormControl>
@@ -149,7 +151,7 @@ export default function EtchTab({
                 <InputField
                   form={form}
                   name="premine"
-                  tooltip="Premined runes to the rune etcher."
+                  tooltip="Amount of runes minted to the rune creator."
                   placeholder="Enter premine amount"
                   type="number"
                   disabled={isNft}
@@ -159,7 +161,7 @@ export default function EtchTab({
                 <InputField
                   form={form}
                   name="amount"
-                  tooltip="The amount of runes each mint produces."
+                  tooltip="The amount of runes for each mint transaction."
                   placeholder="Enter token amount"
                   type="number"
                   disabled={isNft}
@@ -167,16 +169,8 @@ export default function EtchTab({
                 <InputField
                   form={form}
                   name="cap"
-                  tooltip="Total amount of mints."
+                  tooltip="Total amount of mints, without counting premine."
                   placeholder="Enter token cap"
-                  type="number"
-                  disabled={isNft}
-                />
-                <InputField
-                  form={form}
-                  name="divisibility"
-                  tooltip="The number of subunits in a super unit of runes."
-                  placeholder="Enter token divisibility"
                   type="number"
                   disabled={isNft}
                 />
@@ -186,7 +180,7 @@ export default function EtchTab({
                 name="receiver"
                 tooltip="Enter the Rootstock address where runes will be minted into ERC20s"
                 placeholder="RSK address"
-                disabled={isNft}
+                disabled={true}
               />
               <CardFooter className="px-0 relative z-0 justify-end">
                 <Button

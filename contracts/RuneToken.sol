@@ -47,6 +47,7 @@ contract RuneToken is ERC1155, Ownable {
      * @param maxSupply Maximum supply of the token
      * @param initialSupply Initial supply of the token
      * @param defaultMintAmount Default amount to mint each time
+     * @param receiver Address to receive the minted tokens
      */
     function mintFungible(
         string memory tokenURI,

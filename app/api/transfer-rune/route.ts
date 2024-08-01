@@ -28,10 +28,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    )
+    console.log('Error on request is :', error)
+    return NextResponse.json({ error: error }, { status: 500 })
   }
 }
 export async function GET(request: NextRequest) {
@@ -63,9 +61,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    )
+    console.log('Error on request is :', error)
+    return NextResponse.json({ error: error }, { status: 500 })
   }
 }

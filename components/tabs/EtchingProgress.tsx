@@ -59,23 +59,32 @@ export default function EtchingProgress({
 
   const [updateStatusInterval, setUpdateStatusInterval] =
     useState<NodeJS.Timeout | null>(null)
-  const { mintNonFungible, isTxConfirmed } = useRuneERC1155()
+  const { mintNonFungible, isTxConfirmed, mintFungible } = useRuneERC1155()
 
-  const { uri, name, symbol, receiver } = runeProps
+  const { uri, name, symbol, receiver, isNft, amount, premine, cap } = runeProps
 
   const executeMinting = useCallback(async () => {
     try {
       if (!name || !symbol || !receiver) return
 
       const newRuneProps: UseRuneERC1155Props = {
-        uri,
+        uri: uri ?? 'TempURI',
         receiver,
         name,
         symbol,
+        premine,
+        amount,
+        cap,
       }
-      const { hash } = await mintNonFungible(newRuneProps)
-      localStorage.setItem('mintTxHash', hash)
-      setMintTxHash(hash)
+      if (isNft) {
+        const { hash } = await mintNonFungible(newRuneProps)
+        localStorage.setItem('mintTxHash', hash)
+        setMintTxHash(hash)
+      } else {
+        const { hash } = await mintFungible(newRuneProps)
+        localStorage.setItem('mintTxHash', hash)
+        setMintTxHash(hash)
+      }
     } catch (error) {
       toast.error('Error minting the rune')
     }
@@ -149,6 +158,7 @@ export default function EtchingProgress({
             commitTxHash: data.commitTxHash,
             scriptP2trAddress: data.scriptP2trAddress,
             tapLeafScript: data.tapLeafScript,
+            isNft: data.isNft,
             revealTxHash: revealTxHash,
           })
         )
