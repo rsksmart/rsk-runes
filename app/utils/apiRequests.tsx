@@ -1,10 +1,13 @@
+import { toast } from 'react-toastify'
+
 export const getRequest = async (url: string) => {
   try {
     const response = await fetch(url)
     const json = await response.json()
     return json
   } catch (error) {
-    return { error: 'Internal Server Error' }
+    toast.error(`Error on request: ${error}`)
+    return { error: error }
   }
 }
 export const postRequest = async (url: string, data: any) => {
@@ -19,6 +22,7 @@ export const postRequest = async (url: string, data: any) => {
     const json = await response.json()
     return json
   } catch (error) {
-    return { error: 'Internal Server Error' }
+    toast.error(`Error on request: ${error}`)
+    return { error: error }
   }
 }

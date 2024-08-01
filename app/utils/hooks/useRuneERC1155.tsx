@@ -11,10 +11,10 @@ export interface UseRuneERC1155Props {
   name: string
   symbol: string
   receiver: string
+  isNft?: boolean
   premine?: number
   amount?: number
   cap?: number
-  divisibility?: number
 }
 export interface FreezeTxData {
   runeName: string
@@ -65,6 +65,30 @@ export const useRuneERC1155 = () => {
         receiver
       )
 
+      return txResponse
+    } catch (error: any) {
+      toast.error('Error on minting token')
+    }
+  }
+
+  const mintFungible = async (runeData: UseRuneERC1155Props) => {
+    try {
+      const { uri, name, symbol, receiver, premine, amount, cap } = runeData
+      console.log('runeData in mint fungible is', runeData)
+
+      if (!cap || !premine || !amount) {
+        toast.error('Some values are undefined or null')
+        return
+      }
+      const txResponse = await contract.mintFungible(
+        `${uri} TODO: retrieve and save metadata`,
+        name,
+        symbol,
+        ethers.parseUnits(cap.toString(), 18),
+        ethers.parseUnits(premine.toString(), 18),
+        ethers.parseUnits(amount.toString(), 18),
+        receiver
+      )
       return txResponse
     } catch (error: any) {
       toast.error('Error on minting token')
@@ -125,6 +149,7 @@ export const useRuneERC1155 = () => {
 
   return {
     mintNonFungible,
+    mintFungible,
     getUserRunes,
     freezeNonFungible,
     runes,

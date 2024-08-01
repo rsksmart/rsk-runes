@@ -53,6 +53,11 @@ function InputField({
               type={type}
               id={name}
               disabled={disabled}
+              onChange={(e) =>
+                field.onChange(
+                  type === 'number' ? e.target.valueAsNumber : e.target.value
+                )
+              }
             />
           </FormControl>
           <FormMessage>{form.formState.errors[name]?.message}</FormMessage>

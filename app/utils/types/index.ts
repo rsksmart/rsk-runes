@@ -4,7 +4,6 @@ export interface FormData {
   premine?: number
   amount?: number
   cap?: number
-  divisibility?: number
   address?: string
 }
 export interface FormDataRuneToBTC {
@@ -16,4 +15,6 @@ export interface FormDataRuneToBTC {
 export interface EtchTabProps {
   setRuneProps: Function
   setCommitTxHash: Function
+  isNft: boolean
+  setIsNft: Function
 }

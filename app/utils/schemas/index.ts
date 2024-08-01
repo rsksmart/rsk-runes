@@ -12,12 +12,9 @@ export const formSchema = z.object({
   symbol: z
     .string()
     .length(1, { message: 'Symbol must be a single character.' }),
-  premine: z.number(),
+  premine: z.number().min(0, { message: 'Premine is required.' }),
   amount: z.number().min(0, { message: 'Amount is required.' }),
   cap: z.number().min(0, { message: 'Cap is required.' }),
-  divisibility: z
-    .number()
-    .max(38, { message: 'Divisibility cannot be higher than 38.' }),
   receiver: z
     .string()
     .length(42, { message: 'Address cannot exceed 42 characters.' }),

@@ -14,16 +14,7 @@ import {
 export async function POST(request: NextRequest) {
   const data = await request.json()
   try {
-    const {
-      action,
-      name,
-      symbol,
-      premine,
-      amount,
-      cap,
-      divisibility,
-      tapLeafScript,
-    } = data
+    const { action, name, symbol, premine, amount, cap, tapLeafScript } = data
     const deserializedTapLeafScript = tapLeafScript?.map((item: any) => ({
       controlBlock: Buffer.from(item.controlBlock, 'base64'),
       leafVersion: item.leafVersion,
@@ -61,7 +52,6 @@ export async function POST(request: NextRequest) {
           amount,
           cap,
           symbol,
-          divisibility,
           premine,
         })
         return NextResponse.json({ revealTxHash })
@@ -69,10 +59,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: error }, { status: 500 })
   }
 }
 export async function GET(request: NextRequest) {
@@ -114,9 +101,6 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: error }, { status: 500 })
   }
 }
