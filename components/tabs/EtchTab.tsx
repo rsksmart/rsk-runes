@@ -78,6 +78,7 @@ export default function EtchTab({
         setLoading(false)
         return
       }
+      console.log('data of rune is:', data)
       const commitData = await postRequest('/api/etch-rune', {
         name: data.name,
         action: 'commitTx',

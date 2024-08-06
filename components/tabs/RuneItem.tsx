@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Button } from '../ui/button'
 import { ROUTER } from '@/constants'
 import { useAuth } from '@/app/context/AuthContext'
+import { ethers } from 'ethers'
 
 function RuneItem({ rune }: { rune: IRune }) {
   const route = useRouter()
@@ -34,7 +35,13 @@ function RuneItem({ rune }: { rune: IRune }) {
       }
     }
   }, [])
+  const formatUnits = (value: string, decimals = 18) => {
+    console.log(value)
 
+    if (value !== '1') {
+      return ethers.formatUnits(value, decimals)
+    }
+  }
   return (
     <div className="flex justify-between items-center border border-input my-3 p-2 h-16 rounded-lg">
       <div className="flex flex-col justify-start items-start h-full">
@@ -52,7 +59,7 @@ function RuneItem({ rune }: { rune: IRune }) {
             ? 'Bridge in progress'
             : Number(rune.userBalance) === 0
               ? 'Locked'
-              : rune.userBalance}
+              : formatUnits(rune.userBalance)}
         </div>
       </div>
       <div className="flex gap-2">

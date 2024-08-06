@@ -17,6 +17,7 @@ type props = {
   placeholder: string
   tooltip: string
   disabled?: boolean
+  userBalance?: string | null | undefined
 }
 
 function InputField({
@@ -26,6 +27,7 @@ function InputField({
   placeholder,
   type = 'text',
   disabled = false,
+  userBalance = null,
 }: props) {
   return (
     <FormField
@@ -49,7 +51,7 @@ function InputField({
           <FormControl>
             <Input
               {...field}
-              placeholder={placeholder}
+              placeholder={userBalance ?? placeholder}
               type={type}
               id={name}
               disabled={disabled}
