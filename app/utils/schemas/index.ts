@@ -29,7 +29,7 @@ export const formSchemaRuneToBTC = z.object({
     .max(24, {
       message: 'Name cannot exceed 24 characters.',
     }),
-  amount: z.string().min(0, { message: 'Amount is required.' }),
+  amount: z.number().min(0, { message: 'Amount is required.' }),
   address: z
     .string()
     .length(62, { message: 'Address cannot exceed 62 characters.' }),

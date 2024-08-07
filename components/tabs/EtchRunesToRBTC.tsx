@@ -37,6 +37,7 @@ import {
   //@ts-ignore
 } from 'bc-runes-js'
 import { getRequest, postRequest } from '@/app/utils/apiRequests'
+import { ethers } from 'ethers'
 
 export default function EtchRunesToRBTC(): JSX.Element {
   const [updateStatusInterval, setUpdateStatusInterval] =
@@ -53,7 +54,7 @@ export default function EtchRunesToRBTC(): JSX.Element {
     resolver: zodResolver(formSchemaRuneToBTC),
     defaultValues: {
       name: '',
-      amount: '1',
+      amount: '',
       address: '',
     },
   })
@@ -90,6 +91,24 @@ export default function EtchRunesToRBTC(): JSX.Element {
   }, [])
 
   const onSubmit = (data: FormDataRuneToBTC) => {
+    console.log('data on form is', data)
+    console.log('data amount on form is', data.amount)
+    console.log('runeToBTC userbalance is', runeToBTC?.userBalance)
+    console.log(
+      'runeToBTC userbalance parsed is ',
+      ethers.formatUnits(runeToBTC?.userBalance ?? '0', 18)
+    )
+    if (!runeToBTC?.userBalance) {
+      toast.error('No balance found')
+      return
+    }
+    if (
+      Number(data.amount) >
+      Number(ethers.formatUnits(runeToBTC?.userBalance ?? '0', 18))
+    ) {
+      toast.error('Amount is higher than your balance')
+      return
+    }
     processRSKFreeze(data)
   }
   const processRSKFreeze = async (data: FormDataRuneToBTC) => {
@@ -205,12 +224,11 @@ export default function EtchRunesToRBTC(): JSX.Element {
     <Card>
       <CardHeader>
         <CardTitle>Runes to BTC</CardTitle>
-        {/* <CardDescription>runes a new rune.</CardDescription> */}
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-1 gap-4">
               <InputField
                 form={form}
                 name="name"
@@ -218,29 +236,21 @@ export default function EtchRunesToRBTC(): JSX.Element {
                 tooltip='Name of the rune. e.g. "UNCOMMON•GOODS"'
                 disabled
               />
-              <InputField
-                form={form}
-                name="amount"
-                placeholder="Enter rune amount"
-                tooltip="Amount of the rune."
-                disabled
-              />
             </div>
             <FormField
               control={form.control}
-              name="address"
+              name="amount"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center gap-1">
-                    BTC Address
+                    Amount
                     <Tooltip>
                       <TooltipTrigger>
                         <CircleHelp className="w-4 h-4" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="max-w-[200px]">
-                          Enter the Rootstock address where runes will be minted
-                          into ERC20s
+                          Enter the amount of runes you want to send back to BTC
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -248,15 +258,51 @@ export default function EtchRunesToRBTC(): JSX.Element {
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="BTC address"
-                      id="address"
-                      type="text"
+                      placeholder={'Enter rune amount'}
+                      id="amount"
+                      type="number"
+                      onChange={(e) => field.onChange(e.target.valueAsNumber)}
                     />
                   </FormControl>
                   <FormMessage>
-                    {form.formState.errors.address?.message}
+                    {form.formState.errors.amount?.message}
                   </FormMessage>
                 </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <Fragment>
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-1">
+                      BTC Address
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <CircleHelp className="w-4 h-4" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-[200px]">
+                            Enter the Rootstock address where runes will be
+                            minted into ERC20s
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="BTC address"
+                        id="address"
+                        type="text"
+                      />
+                    </FormControl>
+                    <FormMessage>
+                      {form.formState.errors.address?.message}
+                    </FormMessage>
+                  </FormItem>
+                </Fragment>
               )}
             />
             {loading && (

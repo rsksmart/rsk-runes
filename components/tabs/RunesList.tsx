@@ -4,16 +4,18 @@ import { useRuneERC1155 } from '@/app/utils/hooks/useRuneERC1155'
 import { useEffect, useRef } from 'react'
 
 function RunesList() {
-  const { getUserRunes, runes, contract } = useRuneERC1155()
+  const { getUserRunes, runes } = useRuneERC1155()
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     fetchRunes()
     intervalRef.current = setInterval(fetchRunes, 30000)
     return () => clearInterval(intervalRef.current!)
-  }, [contract])
+  }, [])
 
   const fetchRunes = async () => {
+    console.log('fetching runes')
+
     await getUserRunes()
   }
   return (
