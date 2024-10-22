@@ -1,3 +1,4 @@
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/rsksmart/rsk-runes/badge)](https://scorecard.dev/viewer/?uri=github.com/rsksmart/rsk-runes)
 <img src="rootstock-logo.png" alt="RSK Logo" style="width:100%; height: auto;" />
 
 # Runes Mock Bridge
