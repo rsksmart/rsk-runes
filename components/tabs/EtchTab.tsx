@@ -31,7 +31,7 @@ export default function EtchTab({
   setCommitTxHash,
   isNft,
   setIsNft,
-}: EtchTabProps): JSX.Element {
+}: EtchTabProps) {
   const [loading, setLoading] = useState(false)
   const form = useForm<UseRuneERC1155Props>({
     resolver: zodResolver(formSchema),
@@ -58,6 +58,7 @@ export default function EtchTab({
 
   useEffect(() => {
     form.setValue('receiver', walletAddress)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   const handleEtch = async (data: FormData) => {
     try {

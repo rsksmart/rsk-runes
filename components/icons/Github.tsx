@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 
-export function Github({ className }: { className?: string }): JSX.Element {
+export function Github({ className }: { className?: string }) {
   return (
     <svg
       width="23"

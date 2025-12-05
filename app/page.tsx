@@ -65,10 +65,11 @@ export default function Home() {
               </span>
             </div>
             <div className="mt-3 text-justify">
-              The term "toy" denotes that this is not an actual bridge, as each
-              locked rune will be held by a unique, centralized Bitcoin address
-              defined in the configuration. Users will only have ownership over
-              their Rootstock representation until they claim them back.
+              The term {'toy'} denotes that this is not an actual bridge, as
+              each locked rune will be held by a unique, centralized Bitcoin
+              address defined in the configuration. Users will only have
+              ownership over their Rootstock representation until they claim
+              them back.
             </div>
           </div>
           <div className="flex-1 mt-4 border border-white rounded-3xl p-4">
