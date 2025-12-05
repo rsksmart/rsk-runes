@@ -53,6 +53,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     if (isLoggedIn && pathname === ROUTER.INDEX) {
       router.push(ROUTER.RUNES)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname])
 
   return (

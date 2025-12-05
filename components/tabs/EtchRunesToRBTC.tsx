@@ -39,7 +39,7 @@ import {
 import { getRequest, postRequest } from '@/app/utils/apiRequests'
 import { ethers } from 'ethers'
 
-export default function EtchRunesToRBTC(): JSX.Element {
+export default function EtchRunesToRBTC() {
   const [updateStatusInterval, setUpdateStatusInterval] =
     useState<NodeJS.Timeout | null>(null)
   const [loading, setLoading] = useState(false)
@@ -88,6 +88,7 @@ export default function EtchRunesToRBTC(): JSX.Element {
       //if there is not freeze on rsk process yet
       form.reset(runeToBTC)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const onSubmit = (data: FormDataRuneToBTC) => {
@@ -200,6 +201,7 @@ export default function EtchRunesToRBTC(): JSX.Element {
     } catch (error) {
       toast.error('Error reading process status, please refresh the page.')
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   const resetProcess = () => {
     setTransferWaiting(false)
@@ -313,7 +315,7 @@ export default function EtchRunesToRBTC(): JSX.Element {
                     {"Blocking your rune's token in the contract"}
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {`Status is ${freezeTxHash ? '--completed--' : txFreezeStatus ?? '--starting--'}`}
+                    {`Status is ${freezeTxHash ? '--completed--' : (txFreezeStatus ?? '--starting--')}`}
                   </p>
                   {freezeTxHash && (
                     <Fragment>

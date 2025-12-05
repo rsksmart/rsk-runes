@@ -23,6 +23,7 @@ function ConnectWalletDialog({ closeDialog, open }: props) {
       closeDialog()
       setIsError(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn, authLogin, router])
 
   const init = () => {

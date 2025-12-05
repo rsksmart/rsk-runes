@@ -1,6 +1,6 @@
 import { Discord, Github, Twitter } from '@/components/icons'
 
-export default function Footer(): JSX.Element {
+export default function Footer() {
   return (
     <footer className="flex content-end self-end lg:items-center items-start flex-col gap-6 lg:flex-row justify-between w-full py-3 px-5">
       <div>

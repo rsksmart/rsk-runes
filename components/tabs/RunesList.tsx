@@ -11,6 +11,7 @@ function RunesList() {
     fetchRunes()
     intervalRef.current = setInterval(fetchRunes, 30000)
     return () => clearInterval(intervalRef.current!)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const fetchRunes = async () => {

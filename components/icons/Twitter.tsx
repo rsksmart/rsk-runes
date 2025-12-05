@@ -1,4 +1,4 @@
-export function Twitter({ className }: { className?: string }): JSX.Element {
+export function Twitter({ className }: { className?: string }) {
   return (
     <svg
       width="27"

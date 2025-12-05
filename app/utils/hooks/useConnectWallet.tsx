@@ -24,6 +24,7 @@ const useConnectWallet = () => {
       console.error('Error connecting to wallet', error)
       setIsError(!ethereum)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return {

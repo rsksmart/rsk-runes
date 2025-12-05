@@ -47,7 +47,7 @@ export default function EtchingProgress({
   revealTxHash,
   etchedFinished,
   setEtchedFinished,
-}: Props): JSX.Element {
+}: Props) {
   const [commitConfirmations, setCommitConfirmations] = useState(0)
 
   const commitConfirmationsThreshold = 6
@@ -127,6 +127,7 @@ export default function EtchingProgress({
     } catch (error) {
       toast.error('Error updating the status of the etching process')
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [etchedConfirmed, mintTxHash, commitTxHash, revealTxHash, executeMinting])
 
   const executeRevealTxHash = useCallback(async () => {
@@ -187,6 +188,7 @@ export default function EtchingProgress({
     if (!remainingCommitConfirmations) {
       executeRevealTxHash()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [commitConfirmations, executeRevealTxHash])
 
   const goToUrl = (url: string) => {

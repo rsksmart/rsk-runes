@@ -34,6 +34,7 @@ function RuneItem({ rune }: { rune: IRune }) {
         setBridgeButtonLocked(true)
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   const formatUnits = (value: string, decimals = 18) => {
     console.log(value)

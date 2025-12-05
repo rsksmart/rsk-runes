@@ -11,6 +11,7 @@ function Navbar() {
 
   return (
     <nav className="w-full p-6 flex justify-between">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={logo.src} alt="logo" />
       {address && (
         <div className="flex gap-4">
